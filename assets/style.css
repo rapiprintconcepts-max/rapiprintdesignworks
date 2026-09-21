@@ -1,3 +1,4 @@
+/* Global */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -5,11 +6,22 @@ body {
     color: #222;
 }
 
+.container {
+    width: 90%;
+    max-width: 1100px;
+    margin: auto;
+}
+
+/* Header */
 .header {
     background: #ffffff;
-    padding: 30px;
+    padding: 25px 0;
     border-bottom: 1px solid #ddd;
-    text-align: center;
+}
+
+.branding h1 {
+    margin: 0;
+    font-size: 28px;
 }
 
 .tagline {
@@ -19,11 +31,11 @@ body {
 }
 
 .nav {
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
 .nav a {
-    margin: 0 15px;
+    margin-right: 20px;
     text-decoration: none;
     color: #0066cc;
     font-weight: bold;
@@ -33,6 +45,7 @@ body {
     text-decoration: underline;
 }
 
+/* Hero */
 .hero {
     background: linear-gradient(135deg, #e8f2ff, #ffffff);
     padding: 80px 20px;
@@ -62,6 +75,7 @@ body {
     background: #004999;
 }
 
+/* Features */
 .features {
     padding: 60px 20px;
     text-align: center;
@@ -79,8 +93,14 @@ body {
     padding: 25px;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
 }
 
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Materials */
 .materials {
     padding: 40px 20px;
     background: #ffffff;
@@ -90,6 +110,7 @@ body {
     line-height: 1.8;
 }
 
+/* Wide CTA */
 .cta-wide {
     background: #e8f2ff;
     padding: 60px 20px;
@@ -102,9 +123,11 @@ body {
     margin: 10px 0;
 }
 
+/* Footer */
 .footer {
     background: #ffffff;
     padding: 20px;
     text-align: center;
     border-top: 1px solid #ddd;
 }
+
