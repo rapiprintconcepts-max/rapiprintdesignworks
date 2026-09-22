@@ -14,7 +14,6 @@ body {
     line-height: 1.6;
 }
 
-
 .container {
     width: 90%;
     max-width: 1100px;
@@ -37,6 +36,21 @@ section {
     padding: 25px 0;
     border-bottom: 1px solid #ddd;
     margin-bottom: 20px;
+}
+
+/* Logo inside header */
+.site-logo {
+    height: 90px;
+    margin-right: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* Flex layout for logo + nav */
+.header-flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .branding h1 {
