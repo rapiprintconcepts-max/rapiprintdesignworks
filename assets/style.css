@@ -1,6 +1,74 @@
 /* --------------------------------------------------
    GLOBAL
 -------------------------------------------------- */
+/* --------------------------------------------------
+   ANIMATED BACKGROUND LAYERS
+-------------------------------------------------- */
+
+:root {
+    --bg-navy: #0d1b2a;
+    --glow-red: rgba(255, 60, 60, 0.08);
+    --glow-white: rgba(255, 255, 255, 0.06);
+    --glow-blue: rgba(80, 120, 255, 0.08);
+}
+
+/* Background container */
+body::before,
+body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Base navy + corner patriotic glows */
+body::before {
+    background:
+        radial-gradient(circle at top left, var(--glow-red), transparent 60%),
+        radial-gradient(circle at top right, var(--glow-white), transparent 60%),
+        radial-gradient(circle at bottom left, var(--glow-blue), transparent 60%),
+        var(--bg-navy);
+    animation: glowPulse 28s ease-in-out infinite;
+}
+
+/* Slow drifting construction lines */
+body::after {
+    background-image:
+        repeating-linear-gradient(
+            135deg,
+            rgba(255,255,255,0.03) 0px,
+            rgba(255,255,255,0.03) 1px,
+            transparent 1px,
+            transparent 140px
+        ),
+        repeating-linear-gradient(
+            25deg,
+            rgba(255,255,255,0.02) 0px,
+            rgba(255,255,255,0.02) 1px,
+            transparent 1px,
+            transparent 200px
+        );
+    animation: driftLines 60s linear infinite;
+    opacity: 0.35;
+}
+
+/* Slow glow breathing */
+@keyframes glowPulse {
+    0% { opacity: 0.9; }
+    50% { opacity: 1; }
+    100% { opacity: 0.9; }
+}
+
+/* Ultra slow drifting lines */
+@keyframes driftLines {
+    0% { transform: translate(0px, 0px); }
+    100% { transform: translate(40px, -40px); }
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
