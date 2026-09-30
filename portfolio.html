@@ -14,16 +14,77 @@ description: Explore prototype, tooling, custom part, and specialty fabrication 
 
 <section class="features">
     <div class="container">
-        <p class="eyebrow">Project gallery</p>
+        <h3>Project gallery</h3>
         <h2>Built for the job</h2>
+        
         <div class="portfolio-grid">
-            <article class="portfolio-card portfolio-card--red"><span>01 / TOOLING</span><h3>Custom Alignment Jig</h3><p>A precision-printed jig designed for repeatable shop alignment tasks.</p></article>
-            <article class="portfolio-card portfolio-card--blue"><span>02 / PROTOTYPE</span><h3>Prototype Housing</h3><p>A functional enclosure engineered for fit, durability, and fast iteration.</p></article>
-            <article class="portfolio-card portfolio-card--navy"><span>03 / SYSTEM</span><h3>Shop Bracket System</h3><p>High-strength PETG brackets designed to improve a real-world workflow.</p></article>
-            <article class="portfolio-card portfolio-card--paper"><span>04 / SPECIALTY</span><h3>Specialty Tooling</h3><p>A one-off tool built around a specific production environment and its constraints.</p></article>
+            <div class="carousel-container">
+                <div class="carousel-slides" id="carouselSlides">
+                    <article class="carousel-slide portfolio-card--red">
+                        <div style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 40px;">
+                            <span>01 / TOOLING</span>
+                            <h3>Custom Alignment Jig</h3>
+                            <p>A precision-printed jig designed for repeatable shop alignment tasks.</p>
+                        </div>
+                    </article>
+                    <article class="carousel-slide portfolio-card--blue">
+                        <div style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 40px;">
+                            <span>02 / PROTOTYPE</span>
+                            <h3>Prototype Housing</h3>
+                            <p>A functional enclosure engineered for fit, durability, and fast iteration.</p>
+                        </div>
+                    </article>
+                    <article class="carousel-slide portfolio-card--navy">
+                        <div style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 40px;">
+                            <span>03 / SYSTEM</span>
+                            <h3>Shop Bracket System</h3>
+                            <p>High-strength PETG brackets designed to improve a real-world workflow.</p>
+                        </div>
+                    </article>
+                    <article class="carousel-slide portfolio-card--paper">
+                        <div style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 40px;">
+                            <span>04 / SPECIALTY</span>
+                            <h3>Specialty Tooling</h3>
+                            <p>A one-off tool built around a specific production environment and its constraints.</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+            <div class="carousel-controls">
+                <button class="carousel-btn active" onclick="goToSlide(0)">01</button>
+                <button class="carousel-btn" onclick="goToSlide(1)">02</button>
+                <button class="carousel-btn" onclick="goToSlide(2)">03</button>
+                <button class="carousel-btn" onclick="goToSlide(3)">04</button>
+            </div>
+            <div class="carousel-counter" id="carouselCounter">1 / 4</div>
         </div>
+        
         <p class="muted-note">More projects are coming soon. Have a project that belongs here?</p>
     </div>
 </section>
 
 <section class="cta-wide"><div class="container"><h2>Make the next one yours.</h2><p>Tell us what you are trying to build, improve, or solve.</p><a class="cta-button" href="/contact.html">Start Your Project <span aria-hidden="true">↗</span></a></div></section>
+
+<script>
+let currentSlide = 0;
+const totalSlides = 4;
+
+function goToSlide(n) {
+  currentSlide = n;
+  const carousel = document.getElementById('carouselSlides');
+  carousel.style.transform = `translateX(-${n * 100}%)`;
+  updateButtons();
+  updateCounter();
+}
+
+function updateButtons() {
+  const buttons = document.querySelectorAll('.carousel-btn');
+  buttons.forEach((btn, index) => {
+    btn.classList.toggle('active', index === currentSlide);
+  });
+}
+
+function updateCounter() {
+  document.getElementById('carouselCounter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+}
+</script>
