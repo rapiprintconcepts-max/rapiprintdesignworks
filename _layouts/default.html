@@ -3,23 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Rapiprint Design Works creates bold, precision-engineered prototypes, custom parts, and studio tools in South-Central Iowa.">
+    <meta name="description" content="{{ page.description | default: 'Rapiprint Design Works creates bold, precision-engineered prototypes, custom parts, and studio tools in South-Central Iowa.' }}">
     <meta name="theme-color" content="#0d1b2a">
-    <meta property="og:title" content="Rapiprint Design Works | Bold Ideas. Built Precisely.">
-    <meta property="og:description" content="Custom 3D design, functional prototypes, and precision manufacturing for ideas that deserve to be built.">
+    <meta property="og:title" content="{{ page.title | default: 'Rapiprint Design Works' }} | Rapiprint Design Works">
+    <meta property="og:description" content="{{ page.description | default: 'Bold ideas. Built precisely.' }}">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://rapiprintdesignworks.com/">
-    <link rel="canonical" href="https://rapiprintdesignworks.com/">
-    <title>Rapiprint Design Works | Bold Ideas. Built Precisely.</title>
+    <meta property="og:url" content="https://rapiprintdesignworks.com{{ page.url }}">
+    <link rel="canonical" href="https://rapiprintdesignworks.com{{ page.url }}">
+    <title>{{ page.title | default: 'Rapiprint Design Works' }} | Rapiprint Design Works</title>
     <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
     {% include header.html %}
-
-    <main>
-        {{ content }}
-    </main>
-
+    <main>{{ content }}</main>
     <footer class="footer">
         <div class="container footer-inner">
             <p><strong>Rapiprint Design Works LLC</strong></p>
