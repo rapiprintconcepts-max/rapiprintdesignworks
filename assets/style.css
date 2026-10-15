@@ -8,8 +8,8 @@
 .container {
   max-width: 1100px;
   margin: 0 auto;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding-left: 6px;    /* reduced to 30% of previous 20px */
+  padding-right: 6px;   /* reduced to 30% of previous 20px */
 }
 
 /* Portfolio carousel: centered and fixed to 50% of the page width */
@@ -58,6 +58,12 @@
   object-fit:contain;
   display:block;
 }
+
+/* Brand: logo with visible centered brand text underneath */
+.brand{display:flex;flex-direction:column;align-items:center;text-decoration:none}
+.brand .brand-text{margin-top:6px;font-weight:800;color:var(--accent);text-align:center;font-size:0.95rem;line-height:1;}
+/* Add black outline for text for stronger contrast */
+.brand .brand-text{ -webkit-text-stroke: 1px #000; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
 
 .header{padding:14px 0;background:var(--navy);color:var(--white);border-bottom:3px solid var(--accent)}
 .header-flex{display:flex;align-items:center;justify-content:space-between;gap:18px}
