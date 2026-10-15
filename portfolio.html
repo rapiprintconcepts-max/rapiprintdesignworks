@@ -95,6 +95,7 @@ title: Portfolio
   const autoplayDelay = 3500;
   let autoplayId = null;
   const MAX_CLIP_SECONDS = 10; // enforce 10s clip length
+  let computedMaxHeight = 0; // will store the height derived from the largest media
 
   dotsContainer.innerHTML = '';
   slides.forEach((_, i) => {
@@ -107,30 +108,70 @@ title: Portfolio
 
   const dots = Array.from(dotsContainer.children);
 
+  // Ensure slides fill the carousel width (uniform width) and prepare media styles
   function sizeSlides() {
     const w = carousel.clientWidth;
     slides.forEach(s => {
       s.style.minWidth = w + 'px';
       s.style.maxWidth = w + 'px';
-      // Ensure media inside can resize properly
       const media = s.querySelector('img, video');
       if (media) {
         media.style.maxWidth = '100%';
+        media.style.width = '100%';
         media.style.height = 'auto';
         media.style.display = 'block';
+        media.style.objectFit = 'contain';
       }
     });
   }
 
-  function adjustHeight() {
-    const currentSlide = slides[current];
-    if (!currentSlide) return;
-    const inner = currentSlide.querySelector('.slide-inner') || currentSlide;
-    const caption = currentSlide.querySelector('figcaption');
-    const innerRect = inner.getBoundingClientRect();
-    const captionRect = caption ? caption.getBoundingClientRect() : { height: 0 };
-    const total = Math.ceil(innerRect.height + (captionRect.height || 0));
-    carousel.style.height = total + 'px';
+  // Compute the maximum slide height required so the carousel can be set to that once
+  function computeMaxSlideHeight() {
+    const w = carousel.clientWidth;
+    let maxH = 0;
+
+    slides.forEach(s => {
+      const media = s.querySelector('img, video');
+      const caption = s.querySelector('figcaption');
+      const captionH = caption ? caption.getBoundingClientRect().height : 0;
+      if (!media) {
+        // fallback to inner height
+        const inner = s.querySelector('.slide-inner') || s;
+        const h = inner.getBoundingClientRect().height + captionH;
+        if (h > maxH) maxH = h;
+        return;
+      }
+
+      if (media.tagName.toLowerCase() === 'img') {
+        const img = media;
+        const nW = img.naturalWidth || img.width;
+        const nH = img.naturalHeight || img.height;
+        if (nW && nH) {
+          const displayedH = Math.ceil(w * (nH / nW));
+          if (displayedH + captionH > maxH) maxH = displayedH + captionH;
+          return;
+        }
+        // fallback to measured height
+        const measured = media.getBoundingClientRect().height + captionH;
+        if (measured > maxH) maxH = measured;
+      } else if (media.tagName.toLowerCase() === 'video') {
+        const v = media;
+        const vW = v.videoWidth || v.clientWidth;
+        const vH = v.videoHeight || v.clientHeight;
+        if (vW && vH) {
+          const displayedH = Math.ceil(w * (vH / vW));
+          if (displayedH + captionH > maxH) maxH = displayedH + captionH;
+          return;
+        }
+        // fallback
+        const measured = media.getBoundingClientRect().height + captionH;
+        if (measured > maxH) maxH = measured;
+      }
+    });
+
+    computedMaxHeight = Math.max(maxH, 200); // set a sensible minimum
+    // apply the computed height and keep it fixed for the entire slideshow
+    carousel.style.height = Math.ceil(computedMaxHeight) + 'px';
   }
 
   function update() {
@@ -149,8 +190,6 @@ title: Portfolio
       const v = s.querySelector('video');
       if (v && i !== current) { v.pause(); v.currentTime = 0; }
     });
-
-    requestAnimationFrame(adjustHeight);
   }
 
   function goTo(index) {
@@ -199,18 +238,21 @@ title: Portfolio
 
   window.addEventListener('resize', () => {
     sizeSlides();
+    // recompute max height on resize and keep fixed
+    computeMaxSlideHeight();
     requestAnimationFrame(() => { update(); });
   });
 
+  // Attach media load handlers and clip timers
   slides.forEach(s => {
     const media = s.querySelector('img, video');
     if (media && media.tagName.toLowerCase() === 'img') {
       const img = media;
-      if (!img.complete) img.addEventListener('load', () => { sizeSlides(); update(); });
+      if (!img.complete) img.addEventListener('load', () => { sizeSlides(); computeMaxSlideHeight(); update(); });
     } else if (media && media.tagName.toLowerCase() === 'video') {
       const vid = media;
-      // ensure metadata load triggers sizing
-      vid.addEventListener('loadedmetadata', () => { sizeSlides(); update(); });
+      // ensure metadata load triggers sizing and height calc
+      vid.addEventListener('loadedmetadata', () => { sizeSlides(); computeMaxSlideHeight(); update(); });
 
       // enforce 10s max playback per clip
       let clipTimer = null;
@@ -229,7 +271,11 @@ title: Portfolio
 
   // initial
   sizeSlides();
-  update();
-  startAutoplay();
+  // Wait a tick to allow layout/measurements then compute biggest height and set it
+  requestAnimationFrame(() => {
+    computeMaxSlideHeight();
+    update();
+    startAutoplay();
+  });
 })();
 </script>
