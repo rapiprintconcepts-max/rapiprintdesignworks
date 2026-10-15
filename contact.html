@@ -191,6 +191,135 @@ function openMailto(mailto) {
   }
 }
 
+async function writeClipboardHtml(html, text) {
+  if (navigator.clipboard && navigator.clipboard.write) {
+    try {
+      const blobHtml = new Blob([html], { type: 'text/html' });
+      const blobText = new Blob([text], { type: 'text/plain' });
+      const item = new ClipboardItem({ 'text/html': blobHtml, 'text/plain': blobText });
+      await navigator.clipboard.write([item]);
+      return true;
+    } catch (err) {
+      // fall through to plain-text fallback
+    }
+  }
+  // plain-text fallback using execCommand
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function buildHtmlAndText(fd) {
+  const parts = [];
+  function push(name, label) {
+    const v = fd.getAll(name);
+    if (!v || v.length === 0) return;
+    if (v.length === 1) { parts.push({ label, value: v[0] }); }
+    else { parts.push({ label, value: v.join(', ') }); }
+  }
+
+  const lines = [];
+  const htmlLines = [];
+
+  lines.push('Submitted at (UTC): ' + isoNow());
+  htmlLines.push('<p><em>Submitted at (UTC): ' + isoNow() + '</em></p>');
+  htmlLines.push('<h2>RDW intake submission</h2>');
+
+  push('customer_name', 'Customer name');
+  push('contact', 'Phone / Email');
+  push('address', 'Address / Part location');
+  push('business', 'Business / Entity');
+  push('part_name', 'Part name / description');
+
+  // simple retrieval for single fields
+  const ordered = [
+    { key: 'customer_name', label: 'Customer name' },
+    { key: 'contact', label: 'Phone / Email' },
+    { key: 'address', label: 'Address / Part location' },
+    { key: 'business', label: 'Business / Entity' },
+    { key: 'part_name', label: 'Part name / description' }
+  ];
+
+  ordered.forEach(o => {
+    const v = fd.getAll(o.key);
+    if (v && v.length) {
+      lines.push(o.label + ': ' + v.join(', '));
+      htmlLines.push('<p><strong>' + o.label + ':</strong> ' + escapeHtml(v.join(', ')) + '</p>');
+    }
+  });
+
+  const partCondition = fd.get('part_condition') || '';
+  lines.push('Part condition: ' + partCondition);
+  htmlLines.push('<p><strong>Part condition:</strong> ' + escapeHtml(partCondition) + '</p>');
+
+  const materials = fd.getAll('material[]').filter(Boolean);
+  lines.push('Material(s): ' + (materials.join(', ') || ''));
+  htmlLines.push('<p><strong>Material(s):</strong> ' + escapeHtml(materials.join(', ')) + '</p>');
+
+  lines.push('Mates with other parts: ' + (fd.get('mates_with') || ''));
+  htmlLines.push('<p><strong>Mates with other parts:</strong> ' + escapeHtml(fd.get('mates_with') || '') + '</p>');
+
+  lines.push('Have mating part: ' + (fd.get('have_mating_part') || ''));
+  htmlLines.push('<p><strong>Have mating part:</strong> ' + escapeHtml(fd.get('have_mating_part') || '') + '</p>');
+
+  const func = fd.get('function_desc') || '';
+  lines.push('Function: ' + func);
+  htmlLines.push('<p><strong>Function / what it does:</strong><br>' + escapeHtml(func).replace(/\n/g, '<br>') + '</p>');
+
+  const services = fd.getAll('service[]').filter(Boolean);
+  lines.push('Service(s) needed: ' + services.join(', '));
+  htmlLines.push('<p><strong>Service(s) needed:</strong> ' + escapeHtml(services.join(', ')) + '</p>');
+
+  lines.push('Accuracy needed: ' + (fd.get('accuracy') || ''));
+  htmlLines.push('<p><strong>Accuracy needed:</strong> ' + escapeHtml(fd.get('accuracy') || '') + '</p>');
+
+  lines.push('Timeline: ' + (fd.get('timeline_type') || ''));
+  htmlLines.push('<p><strong>Timeline:</strong> ' + escapeHtml(fd.get('timeline_type') || '') + '</p>');
+
+  const partFiles = document.getElementById('part_photos');
+  const assemblyFiles = document.getElementById('assembly_photos');
+  const otherFiles = document.getElementById('other_files');
+  if (partFiles && partFiles.files.length) {
+    lines.push('Part photos (selected): ' + Array.from(partFiles.files).map(f => f.name).join(', '));
+    htmlLines.push('<p><strong>Part photos (selected):</strong> ' + escapeHtml(Array.from(partFiles.files).map(f => f.name).join(', ')) + '</p>');
+  }
+  if (assemblyFiles && assemblyFiles.files.length) {
+    lines.push('Assembly photos (selected): ' + Array.from(assemblyFiles.files).map(f => f.name).join(', '));
+    htmlLines.push('<p><strong>Assembly photos (selected):</strong> ' + escapeHtml(Array.from(assemblyFiles.files).map(f => f.name).join(', ')) + '</p>');
+  }
+  if (otherFiles && otherFiles.files.length) {
+    lines.push('Other files (selected): ' + Array.from(otherFiles.files).map(f => f.name).join(', '));
+    htmlLines.push('<p><strong>Other files (selected):</strong> ' + escapeHtml(Array.from(otherFiles.files).map(f => f.name).join(', ')) + '</p>');
+  }
+
+  const additional = fd.get('additional_notes') || '';
+  lines.push('Additional notes: ' + additional);
+  htmlLines.push('<p><strong>Additional notes:</strong><br>' + escapeHtml(additional).replace(/\n/g, '<br>') + '</p>');
+
+  const shortRef = fd.get('additional_short') || '';
+  lines.push('Short reference: ' + shortRef);
+  htmlLines.push('<p><strong>Short reference:</strong> ' + escapeHtml(shortRef) + '</p>');
+
+  htmlLines.push('<hr>');
+  htmlLines.push('<p>Form submitted from: <a href="' + escapeHtml(window.location.href) + '">' + escapeHtml(window.location.href) + '</a></p>');
+  lines.push('---');
+  lines.push('Form submitted from: ' + window.location.href);
+
+  return { html: '<html><body>' + htmlLines.join('\n') + '</body></html>', text: lines.join('\n') };
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   const form = document.querySelector('.intake-form');
   if (!form) return;
@@ -207,80 +336,60 @@ document.addEventListener('DOMContentLoaded', function () {
     return formData.getAll(name).filter(Boolean);
   }
 
-  form.addEventListener('submit', function (e) {
+  form.addEventListener('submit', async function (e) {
     e.preventDefault();
 
     const recipient = getRecipient();
 
-    if (!confirm('This will open your email client to send the intake message. Please attach any files manually in your email compose window. Continue?')) return;
+    if (!confirm('This will open your email client to send the intake message. Files must be attached manually in the email compose window. Continue?')) return;
 
     const fd = new FormData(form);
-    const lines = [];
 
-    function push(name, label) {
-      const v = fd.getAll(name);
-      if (!v || v.length === 0) return;
-      if (v.length === 1) lines.push(label + ': ' + v[0]);
-      else lines.push(label + ': ' + v.join(', '));
+    const { html, text } = buildHtmlAndText(fd);
+
+    const didCopy = await writeClipboardHtml(html, text).catch(() => false);
+
+    if (didCopy) {
+      // Inform the user that rich HTML was copied to clipboard and they should paste into the email body
+      alert('The formatted intake text (HTML) has been copied to your clipboard. When your email compose window opens, paste into the body (Ctrl/Cmd+V) to preserve formatting.');
+    } else {
+      // If we couldn't copy, fall back to downloadable HTML and short mailto
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const dl = document.createElement('a');
+      dl.href = url;
+      dl.download = 'RDW-intake.html';
+      document.body.appendChild(dl);
+      dl.click();
+      setTimeout(() => { URL.revokeObjectURL(url); dl.remove(); }, 1500);
+      alert('Could not copy rich text to clipboard. A RDW-intake.html file was downloaded — attach this file to your email.');
     }
 
-    lines.push('Submitted at (UTC): ' + isoNow());
-
-    push('customer_name', 'Customer name');
-    push('contact', 'Phone / Email');
-    push('address', 'Address / Part location');
-    push('business', 'Business / Entity');
-    push('part_name', 'Part name / description');
-    lines.push('Part condition: ' + (fd.get('part_condition') || ''));
-    lines.push('Material(s): ' + (collectCheckedValues(fd, 'material[]').join(', ') || ''));
-    lines.push('Mates with other parts: ' + (fd.get('mates_with') || ''));
-    lines.push('Have mating part: ' + (fd.get('have_mating_part') || ''));
-    push('function_desc', 'Function / what it does');
-    lines.push('Service(s) needed: ' + (collectCheckedValues(fd, 'service[]').join(', ') || ''));
-    lines.push('Accuracy needed: ' + (fd.get('accuracy') || ''));
-    lines.push('Timeline: ' + (fd.get('timeline_type') || ''));
-
-    const partFiles = document.getElementById('part_photos');
-    const assemblyFiles = document.getElementById('assembly_photos');
-    const otherFiles = document.getElementById('other_files');
-    if (partFiles && partFiles.files.length) lines.push('Part photos (selected): ' + Array.from(partFiles.files).map(f => f.name).join(', '));
-    if (assemblyFiles && assemblyFiles.files.length) lines.push('Assembly photos (selected): ' + Array.from(assemblyFiles.files).map(f => f.name).join(', '));
-    if (otherFiles && otherFiles.files.length) lines.push('Other files (selected): ' + Array.from(otherFiles.files).map(f => f.name).join(', '));
-
-    push('additional_notes', 'Additional notes');
-    push('additional_short', 'Short reference');
-
-    lines.push('---');
-    lines.push('Form submitted from: ' + window.location.href);
-
     const subject = 'RDW intake form — ' + (fd.get('customer_name') || fd.get('part_name') || 'New submission');
-    const body = lines.join('\n');
-
-    const encodedBody = safeEncodeBody(body);
+    // include a short plain-text summary in the mailto body so clients that accept it show something
+    const shortBody = text.split('\n').slice(0, 20).join('\n');
+    const encodedBody = safeEncodeBody(shortBody);
     const mailto = 'mailto:' + encodeURIComponent(recipient) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodedBody;
 
     // If mailto URL is very long, provide a downloadable text file fallback and open a short mailto
     if (mailto.length > 2000) {
-      // create a downloadable text file with the full body
-      const blob = new Blob([body], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const dl = document.createElement('a');
-      dl.href = url;
-      dl.download = 'RDW-intake.txt';
-      dl.style.display = 'none';
-      document.body.appendChild(dl);
-      dl.click();
-      setTimeout(() => { URL.revokeObjectURL(url); dl.remove(); }, 1500);
+      const blob2 = new Blob([text], { type: 'text/plain' });
+      const url2 = URL.createObjectURL(blob2);
+      const dl2 = document.createElement('a');
+      dl2.href = url2;
+      dl2.download = 'RDW-intake.txt';
+      document.body.appendChild(dl2);
+      dl2.click();
+      setTimeout(() => { URL.revokeObjectURL(url2); dl2.remove(); }, 1500);
 
-      const shortBody = encodeURIComponent('Please see attached RDW-intake.txt for full submission details.');
-      const shortMailto = 'mailto:' + encodeURIComponent(recipient) + '?subject=' + encodeURIComponent(subject) + '&body=' + shortBody;
+      const shortMailto = 'mailto:' + encodeURIComponent(recipient) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent('Please see attached RDW-intake.txt for full submission details.');
       openMailto(shortMailto);
       return;
     }
 
     const ok = openMailto(mailto);
     if (!ok) {
-      alert('Could not open your mail client automatically. Please copy the form text manually and send to ' + recipient + '.');
+      alert('Could not open your mail client automatically. Please paste the copied content into an email to ' + recipient + '.');
     }
   });
 });
