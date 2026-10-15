@@ -24,7 +24,7 @@ title: Contact
         <h3 id="intake">Project intake form</h3>
         <p>Please fill the form below with as much detail as you have. Attach photos or sketches if possible.</p>
 
-        <form action="https://formspree.io/f/yourFormID" method="POST" enctype="multipart/form-data" class="intake-form" novalidate>
+        <form action="#" method="POST" enctype="multipart/form-data" class="intake-form" novalidate>
 
           <fieldset>
             <legend>Customer information</legend>
@@ -159,10 +159,86 @@ title: Contact
             <a class="cta-link" href="mailto:admin@rapiprintdesignworks.com">Or email sketches to admin@rapiprintdesignworks.com</a>
           </div>
 
-          <p class="muted-note" style="margin-top:10px">Note: replace the form action with your server or Formspree endpoint if you want submissions routed automatically. File uploads require an endpoint that supports multipart/form-data.</p>
+          <p class="muted-note" style="margin-top:10px">Note: this form will open your email client with a prefilled message; attach files manually in your mail client after the compose window opens. The recipient address is taken from the contact email on the page so updating that email keeps submissions working.</p>
         </form>
 
       </div>
     </div>
   </div>
 </section>
+
+<script>
+function isoNow() { return new Date().toISOString(); }
+
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.querySelector('.intake-form');
+  if (!form) return;
+
+  function getRecipient() {
+    const pageMail = document.querySelector('.contact-intro a[href^="mailto:"]') || document.querySelector('footer a[href^="mailto:"]') || document.querySelector('a[href^="mailto:"]');
+    if (pageMail) {
+      return (pageMail.getAttribute('href') || '').replace(/^mailto:/i, '') || 'admin@rapiprintdesignworks.com';
+    }
+    return 'admin@rapiprintdesignworks.com';
+  }
+
+  function collectCheckedValues(formData, name) {
+    return formData.getAll(name).filter(Boolean);
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const recipient = getRecipient();
+
+    if (!confirm('This will open your email client to send the intake message. Please attach any files manually in your email compose window. Continue?')) return;
+
+    const fd = new FormData(form);
+    const lines = [];
+
+    function push(name, label) {
+      const v = fd.getAll(name);
+      if (!v || v.length === 0) return;
+      if (v.length === 1) lines.push(label + ': ' + v[0]);
+      else lines.push(label + ': ' + v.join(', '));
+    }
+
+    // Include a submission timestamp so the meta date is preserved
+    lines.push('Submitted at (UTC): ' + isoNow());
+
+    push('customer_name', 'Customer name');
+    push('contact', 'Phone / Email');
+    push('address', 'Address / Part location');
+    push('business', 'Business / Entity');
+    push('part_name', 'Part name / description');
+    lines.push('Part condition: ' + (fd.get('part_condition') || ''));
+    lines.push('Material(s): ' + (collectCheckedValues(fd, 'material[]').join(', ') || ''));
+    lines.push('Mates with other parts: ' + (fd.get('mates_with') || ''));
+    lines.push('Have mating part: ' + (fd.get('have_mating_part') || ''));
+    push('function_desc', 'Function / what it does');
+    lines.push('Service(s) needed: ' + (collectCheckedValues(fd, 'service[]').join(', ') || ''));
+    lines.push('Accuracy needed: ' + (fd.get('accuracy') || ''));
+    lines.push('Timeline: ' + (fd.get('timeline_type') || ''));
+
+    const partFiles = document.getElementById('part_photos');
+    const assemblyFiles = document.getElementById('assembly_photos');
+    const otherFiles = document.getElementById('other_files');
+    if (partFiles && partFiles.files.length) lines.push('Part photos (selected): ' + Array.from(partFiles.files).map(f => f.name).join(', '));
+    if (assemblyFiles && assemblyFiles.files.length) lines.push('Assembly photos (selected): ' + Array.from(assemblyFiles.files).map(f => f.name).join(', '));
+    if (otherFiles && otherFiles.files.length) lines.push('Other files (selected): ' + Array.from(otherFiles.files).map(f => f.name).join(', '));
+
+    push('additional_notes', 'Additional notes');
+    push('additional_short', 'Short reference');
+
+    lines.push('---');
+    lines.push('Form submitted from: ' + window.location.href);
+
+    const subject = 'RDW intake form — ' + (fd.get('customer_name') || fd.get('part_name') || 'New submission');
+    const body = lines.join('\n');
+
+    const mailto = 'mailto:' + encodeURIComponent(recipient) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+
+    window.location.href = mailto;
+  });
+});
+</script>
