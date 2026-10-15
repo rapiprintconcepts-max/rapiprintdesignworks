@@ -43,7 +43,7 @@ title: Portfolio
   </div>
 </section>
 
-<section class="cta-wide"><div class="container"><h2>Want to see more?</h2><p>Contact us with your project details and we’ll show you relevant examples.</p><a class="cta-button" href="/contact.html#intake">Start a Project</a></div></section>
+<section class="cta-wide"><div class="container"><h2>Want to see more?</h2><p>Contact us with your project details and we’ll show you relevant examples.</p><a class="cta-button" href="/contact.html#intake">Get in touch</a></div></section>
 
 <script>
 (function () {
@@ -73,8 +73,11 @@ title: Portfolio
   const dots = Array.from(dotsContainer.children);
 
   function update() {
-    const offset = -current * 100;
-    track.style.transform = `translateX(${offset}%)`;
+    // Use pixel-based translation based on the carousel visible width to avoid percent/misalignment
+    const slideWidth = carousel.clientWidth;
+    const offsetPx = -current * slideWidth;
+    track.style.transform = `translateX(${offsetPx}px)`;
+
     slides.forEach((s, i) => s.setAttribute('aria-hidden', i === current ? 'false' : 'true'));
     dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
   }
@@ -122,6 +125,12 @@ title: Portfolio
   carousel.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft') prevSlide();
     if (e.key === 'ArrowRight') nextSlide();
+  });
+
+  // handle resize: ensure translate matches new widths and keep current slide centered
+  window.addEventListener('resize', () => {
+    // small delay to allow layout to settle
+    requestAnimationFrame(update);
   });
 
   // initial
