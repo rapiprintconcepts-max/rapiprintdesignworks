@@ -35,11 +35,13 @@
   padding: 12px;
 }
 
+/* Make carousel images fill the slide width (full-size horizontally) while preserving aspect ratio */
+.carousel-slide .slide-inner img,
 .carousel-slide img {
-  width: auto !important;
-  max-width: 100% !important;
-  height: auto !important;
-  object-fit: none !important;
+  width: 100% !important;    /* fill available width */
+  height: auto !important;   /* preserve aspect ratio */
+  max-width: none !important;
+  object-fit: contain !important;
   display: block;
   margin: 0 auto;
 }
