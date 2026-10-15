@@ -25,23 +25,26 @@
   display: block;
 }
 
+/* Define a fixed visual area for the slide content so images scale to fit inside without skewing */
 .carousel-slide .slide-inner {
   width: 100%;
-  height: 100%;
+  /* Use a viewport-relative height so the carousel has consistent visual height across slides */
+  height: 60vh; /* adjust to taste: 50vh / 60vh / 70vh */
   display: flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  padding: 12px;
+  padding: 0; /* remove breathing room so image can use full area */
 }
 
-/* Make carousel images fill the slide width (full-size horizontally) while preserving aspect ratio */
+/* Keep the image's natural aspect ratio; fit it inside slide-inner without cropping or skewing */
 .carousel-slide .slide-inner img,
 .carousel-slide img {
-  width: 100% !important;    /* fill available width */
-  height: auto !important;   /* preserve aspect ratio */
-  max-width: none !important;
-  object-fit: contain !important;
+  max-width: 100% !important;   /* don't overflow horizontally */
+  max-height: 100% !important;  /* don't overflow vertically */
+  width: auto !important;        /* preserve aspect ratio */
+  height: auto !important;       /* preserve aspect ratio */
+  object-fit: contain !important; /* ensures entire image is visible and not cropped */
   display: block;
   margin: 0 auto;
 }
@@ -49,5 +52,6 @@
 .carousel-dots { z-index: 10; }
 .carousel-control { z-index: 10; }
 
-@media(max-width:960px){ .carousel { max-width: 92%; } }
-@media(max-width:600px){ .carousel { max-width: 96%; } }
+/* Slightly narrower max-width on smaller screens so the carousel breathes inside container */
+@media(max-width:960px){ .carousel { max-width: 92%; } .carousel-slide .slide-inner{ height:50vh } }
+@media(max-width:600px){ .carousel { max-width: 96%; } .carousel-slide .slide-inner{ height:40vh } }
