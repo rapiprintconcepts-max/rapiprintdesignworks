@@ -23,5 +23,48 @@
             <p><a href="mailto:admin@rapiprintdesignworks.com">admin@rapiprintdesignworks.com</a></p>
         </div>
     </footer>
+
+    <div id="gallery-modal" class="gallery-modal" aria-hidden="true">
+        <button type="button" class="gallery-modal-close" aria-label="Close image">×</button>
+        <div class="gallery-modal-content">
+            <img src="" alt="Expanded gallery image">
+            <p class="gallery-modal-caption"></p>
+        </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const modal = document.getElementById('gallery-modal');
+        if (!modal) return;
+
+        const modalImage = modal.querySelector('img');
+        const modalCaption = modal.querySelector('.gallery-modal-caption');
+        const closeButton = modal.querySelector('.gallery-modal-close');
+
+        document.querySelectorAll('[data-lightbox]').forEach(function (link) {
+          link.addEventListener('click', function (event) {
+            event.preventDefault();
+            modalImage.src = this.href;
+            modalCaption.textContent = this.dataset.title || this.querySelector('img')?.alt || 'Project image';
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+          });
+        });
+
+        function closeModal() {
+          modal.classList.remove('is-open');
+          modal.setAttribute('aria-hidden', 'true');
+        }
+
+        closeButton.addEventListener('click', closeModal);
+        modal.addEventListener('click', function (event) {
+          if (event.target === modal) closeModal();
+        });
+
+        document.addEventListener('keydown', function (event) {
+          if (event.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+        });
+      });
+    </script>
 </body>
 </html>
