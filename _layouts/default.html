@@ -11,7 +11,8 @@
     <meta property="og:url" content="https://rapiprintdesignworks.com{{ page.url }}">
     <link rel="canonical" href="https://rapiprintdesignworks.com{{ page.url }}">
     <title>{{ page.title | default: 'Rapiprint Design Works' }} | Rapiprint Design Works</title>
-    <link rel="stylesheet" href="/assets/style.css?v=2026.09.30">
+    <!-- Cache-bust stylesheet on every deploy so visitors always get the latest CSS -->
+    <link rel="stylesheet" href="/assets/style.css?v={{ site.time | date: '%Y%m%d%H%M%S' }}">
     <!-- carousel-fix.css removed — consolidated into /assets/style.css to avoid caching conflicts -->
 </head>
 <body>

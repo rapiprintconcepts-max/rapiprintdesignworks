@@ -1,7 +1,7 @@
 /* Rapiprint Design Works — site-wide stylesheet
    Converted from Simple House template to Rapiprint branding
  */
-:root{--navy:#0d1b2a;--navy-deep:#07111d;--ink:#172231;--white:#fffdf8;--accent:#d94a3a;--muted:#6e8498;--line:rgba(13,27,42,0.08)}
+:root{--navy:#0d1b2a;--navy-deep:#07111d;--ink:#172231;--white:#fffdf8;--accent:#d94a3a;--muted:var(--accent);--line:rgba(13,27,42,0.08)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;line-height:1.55;color:var(--ink);background:linear-gradient(180deg,#ffffff,#fcfdfe)}
 
 /* Page container — center and limit content width */
@@ -70,12 +70,12 @@
 .header-flex{display:flex;align-items:center;justify-content:space-between;gap:18px}
 
 .nav{display:flex;gap:16px;align-items:center}.nav a{color:#dfe9f6;text-transform:uppercase;font-weight:700;font-size:0.78rem;letter-spacing:0.08em}.nav a:hover{color:var(--accent)}
-.nav-cta{background:var(--accent);color:var(--navy);padding:10px 14px;border-radius:999px;font-weight:800}.nav-cta:hover{background:#2f66d9;color:var(--white)}
+.nav-cta{background:var(--accent);color:var(--navy);padding:10px 14px;border-radius:999px;font-weight:800}.nav-cta:hover{background:var(--accent);color:var(--white)}
 section{padding:clamp(48px,8vw,100px) 0}
-.hero{background:linear-gradient(180deg,var(--navy),#08202f);color:var(--white);position:relative}.hero .container{padding-top:18px;padding-bottom:18px}.hero h1{font-size:clamp(2rem,6vw,4.6rem);margin:0 0 12px}
+.hero{background:linear-gradient(180deg,var(--navy),#08202f);color:var(--white);position:relative}.hero .container{padding-top:18px;padding-bottom:18px}.hero h1{font-size:clamp(2rem,6vw,4.6rem);margin:0}
 .features h3{color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:0.12em}
 .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:28px}.card{background:var(--white);padding:22px;border:1px solid var(--line);border-radius:6px}
-.split-layout{display:grid;grid-template-columns:minmax(220px,0.8fr) 1.2fr;gap:40px;align-items:start}.eyebrow{color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:0.12em;margin:0 0 8px}
+.split-layout{display:grid;grid-template-columns:minmax(220px,0.8fr) 1.2fr;gap:40px;align-items:start}.eyebrow{color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:0.12em;margin:0}
 .materials{background:#f0f6fb;padding-bottom:40px;padding-top:40px}.materials-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;list-style:none;padding:0}
 .placeholder{height:140px;background:linear-gradient(90deg,#eef3f8,#f8fbfc);display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:700;border-radius:4px}
 .contact-section{background:var(--white)}.brief-card{background:#fbfbfb;padding:20px;border:1px solid var(--line);border-radius:6px}.intake-form label{display:block;margin-bottom:12px}
@@ -84,9 +84,18 @@ section{padding:clamp(48px,8vw,100px) 0}
 /* Carousel specific styles */
 .carousel{position:relative;overflow:hidden;border-radius:12px;background:linear-gradient(180deg,#fff,#fbfbfd);padding:8px}
 .carousel-track{display:flex;transition:transform .5s cubic-bezier(.22,.9,.28,1);will-change:transform}
-#portfolioCarousel .carousel-slide img, .carousel-slide img{border-radius:8px;display:block;background:#eef3f8}
+.carousel-slide{min-width:100%;flex:0 0 100%;display:flex;flex-direction:column;align-items:center;gap:12px}
+/* Ensure images fill the slide width and preserve aspect ratio without forced cropping or fixed height */
+#portfolioCarousel .carousel-slide img, .carousel-slide img{
+  width:100% !important;
+  height:auto !important;
+  max-width:100% !important;
+  max-height:none !important;
+  object-fit:contain !important; /* do not crop; show full image */
+  border-radius:8px;display:block;background:#eef3f8
+}
 .carousel-slide figcaption{margin-top:8px;font-weight:700;color:var(--ink);text-align:center}
-.carousel-control{position:absolute;top:50%;transform:translateY(-50%);background:rgba(13,27,42,0.85);color:#fff;border:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px}
+.carousel-control{position:absolute;top:50%;transform:translateY(-50%);background:rgba(13,27,42,0.85);color:#fff;border:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.25rem}
 .carousel-prev{left:12px}
 .carousel-next{right:12px}
 .carousel-dots{position:absolute;left:50%;transform:translateX(-50%);bottom:10px;display:flex;gap:8px}
