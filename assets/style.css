@@ -6,7 +6,7 @@
 
 /* Page container — center and limit content width */
 .container {
-  max-width: 1100px;      /* outer page width */
+  max-width: 1100px;
   margin: 0 auto;
   padding-left: 20px;
   padding-right: 20px;
@@ -14,25 +14,47 @@
 
 /* Portfolio carousel: centered and fixed to 50% of the page width */
 .portfolio-gallery .carousel {
-  width: 50%;             /* take 50% of the page (container) width */
-  min-width: 320px;       /* keep usable on small screens */
-  margin: 0 auto;         /* center inside the container */
+  width: 50%;
+  min-width: 320px;
+  margin: 0 auto;
   box-sizing: border-box;
   padding-left: 0;
   padding-right: 0;
 }
 
-/* Ensure slides occupy full carousel height and center media horizontally & vertically */
-.carousel-slide{min-width:100%;flex:0 0 100%;display:flex;flex-direction:column;align-items:center;gap:12px;height:100%}
-.portfolio-gallery .slide-inner{width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:1 1 auto}
+/* Force the track/slide/inner to fill the carousel height and center media */
+.portfolio-gallery .carousel-track,
+.portfolio-gallery .carousel-slide,
+.portfolio-gallery .slide-inner {
+  height: 100%;
+}
+
+.portfolio-gallery .carousel-slide {
+  min-width:100%;
+  flex:0 0 100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+}
+
+.portfolio-gallery .slide-inner {
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  flex:1 1 auto;
+}
 
 /* Ensure media fill the carousel width uniformly and center vertically when shorter than the container */
 .portfolio-gallery .slide-inner img,
 .portfolio-gallery .slide-inner video {
-  width:100%;            /* fill width as requested */
-  height:auto;          /* preserve aspect ratio */
+  width:100%;
+  height:auto;
   max-width:100%;
-  max-height:100%;      /* don't exceed the carousel's inner height */
+  max-height:100%;
+  margin: 0 auto;
   object-fit:contain;
   display:block;
 }
