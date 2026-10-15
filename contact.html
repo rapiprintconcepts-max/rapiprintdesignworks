@@ -23,15 +23,145 @@ title: Contact
       <div class="brief-card">
         <h3 id="intake">Project intake form</h3>
         <p>Please fill the form below with as much detail as you have. Attach photos or sketches if possible.</p>
-        <form action="#" method="post" class="intake-form">
-          <label>Contact name<br><input name="name" required></label>
-          <label>Email<br><input name="email" type="email" required></label>
-          <label>Phone (optional)<br><input name="phone"></label>
-          <label>Project description<br><textarea name="description" rows="6" required></textarea></label>
-          <label>Attach files (links ok)<br><input name="attachments" placeholder="Dropbox / Google Drive link"></label>
-          <button class="cta-button" type="submit">Submit intake</button>
+
+        <form action="https://formspree.io/f/yourFormID" method="POST" enctype="multipart/form-data" class="intake-form" novalidate>
+
+          <fieldset>
+            <legend>Customer information</legend>
+
+            <label for="customer_name">Full name (required)<br>
+              <input id="customer_name" name="customer_name" type="text" required placeholder="Full name">
+            </label>
+
+            <label for="contact">Phone or Email (required)<br>
+              <input id="contact" name="contact" type="text" required placeholder="Phone or email">
+            </label>
+
+            <label for="address">Address / Part location<br>
+              <input id="address" name="address" type="text" placeholder="Street, city, state">
+            </label>
+
+            <label for="business">Business / Entity name (optional)<br>
+              <input id="business" name="business" type="text" placeholder="Company or organization">
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Part details</legend>
+
+            <label for="part_name">Part name / short description (required)<br>
+              <input id="part_name" name="part_name" type="text" required placeholder="Example: left hinge bracket">
+            </label>
+
+            <div style="margin-top:8px">
+              <div style="font-weight:700;margin-bottom:6px">Part condition</div>
+              <label for="part_condition_broken"><input id="part_condition_broken" type="radio" name="part_condition" value="Broken"> Broken</label> &nbsp;
+              <label for="part_condition_worn"><input id="part_condition_worn" type="radio" name="part_condition" value="Worn"> Worn</label> &nbsp;
+              <label for="part_condition_intact"><input id="part_condition_intact" type="radio" name="part_condition" value="Intact"> Intact</label> &nbsp;
+              <label for="part_condition_missing"><input id="part_condition_missing" type="radio" name="part_condition" value="Missing"> Missing</label>
+            </div>
+
+            <div style="margin-top:8px">
+              <div style="font-weight:700;margin-bottom:6px">Material (if known)</div>
+              <label for="material_plastic"><input id="material_plastic" type="checkbox" name="material[]" value="Plastic"> Plastic</label> &nbsp;
+              <label for="material_metal"><input id="material_metal" type="checkbox" name="material[]" value="Metal"> Metal</label> &nbsp;
+              <label for="material_rubber"><input id="material_rubber" type="checkbox" name="material[]" value="Rubber"> Rubber</label> &nbsp;
+              <label for="material_composite"><input id="material_composite" type="checkbox" name="material[]" value="Composite"> Composite</label> &nbsp;
+              <label for="material_unknown"><input id="material_unknown" type="checkbox" name="material[]" value="Unknown"> Unknown</label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Fit & function</legend>
+
+            <div>
+              <div style="font-weight:700;margin-bottom:6px">Does it mate with other parts?</div>
+              <label for="mates_with_yes"><input id="mates_with_yes" type="radio" name="mates_with" value="Yes"> Yes</label> &nbsp;
+              <label for="mates_with_no"><input id="mates_with_no" type="radio" name="mates_with" value="No"> No</label>
+            </div>
+
+            <div style="margin-top:8px">
+              <div style="font-weight:700;margin-bottom:6px">Do you have the mating part?</div>
+              <label for="have_mating_part_yes"><input id="have_mating_part_yes" type="radio" name="have_mating_part" value="Yes"> Yes</label> &nbsp;
+              <label for="have_mating_part_no"><input id="have_mating_part_no" type="radio" name="have_mating_part" value="No"> No</label>
+            </div>
+
+            <label for="function_desc" style="display:block;margin-top:8px">What does the part do / what is its function?<br>
+              <textarea id="function_desc" name="function_desc" rows="4" placeholder="Explain how the part is used and what it must do"></textarea>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Service needed</legend>
+
+            <label for="service_scan"><input id="service_scan" type="checkbox" name="service[]" value="Scan Only"> Scan Only</label><br>
+            <label for="service_cleaned"><input id="service_cleaned" type="checkbox" name="service[]" value="Cleaned Mesh"> Cleaned Mesh</label><br>
+            <label for="service_cad"><input id="service_cad" type="checkbox" name="service[]" value="CAD Model"> CAD Model</label><br>
+            <label for="service_replacement"><input id="service_replacement" type="checkbox" name="service[]" value="Replacement Part"> Replacement Part</label><br>
+            <label for="service_redesign"><input id="service_redesign" type="checkbox" name="service[]" value="Redesign"> Redesign</label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Accuracy & timeline</legend>
+
+            <div style="margin-bottom:8px">
+              <div style="font-weight:700;margin-bottom:6px">Accuracy needed</div>
+              <label for="accuracy_standard"><input id="accuracy_standard" type="radio" name="accuracy" value="Standard"> Standard</label> &nbsp;
+              <label for="accuracy_high"><input id="accuracy_high" type="radio" name="accuracy" value="High"> High</label> &nbsp;
+              <label for="accuracy_tight"><input id="accuracy_tight" type="radio" name="accuracy" value="Tight / OEM"> Tight / OEM</label>
+            </div>
+
+            <div>
+              <div style="font-weight:700;margin-bottom:6px">Timeline</div>
+              <label for="timeline_standard"><input id="timeline_standard" type="radio" name="timeline_type" value="Standard"> Standard</label> &nbsp;
+              <label for="timeline_rush"><input id="timeline_rush" type="radio" name="timeline_type" value="Rush"> Rush</label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Photos / attachments</legend>
+
+            <label for="part_photos">Photos of the part (optional) — upload (multiple allowed)<br>
+              <input id="part_photos" name="part_photos[]" type="file" accept="image/*" multiple>
+            </label>
+
+            <label for="assembly_photos" style="display:block;margin-top:8px">Photos of the assembly (optional) — upload (multiple allowed)<br>
+              <input id="assembly_photos" name="assembly_photos[]" type="file" accept="image/*" multiple>
+            </label>
+
+            <label for="other_files" style="display:block;margin-top:8px">Other files (drawings, STLs, PDFs) — upload (multiple allowed)<br>
+              <input id="other_files" name="other_files[]" type="file" accept=".pdf,.stl,.zip" multiple>
+            </label>
+
+          </fieldset>
+
+          <fieldset>
+            <legend>Additional notes</legend>
+            <label for="additional_notes" style="display:block">Any extra notes, constraints, or reference numbers<br>
+              <textarea id="additional_notes" name="additional_notes" rows="6" placeholder="Add any extra information here"></textarea>
+            </label>
+
+            <!-- editable short word field as requested -->
+            <label for="additional_short" style="display:block;margin-top:8px">Short reference / keyword (editable)<br>
+              <input id="additional_short" name="additional_short" type="text" placeholder="Reference or keyword">
+            </label>
+          </fieldset>
+
+          <label for="consent_checkbox" style="display:block;margin-top:8px;">
+            <input id="consent_checkbox" type="checkbox" name="consent" required> I agree to be contacted about this inquiry.
+          </label>
+
+          <input type="hidden" name="_subject" value="RDW intake form submission">
+          <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="nope">
+
+          <div style="margin-top:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+            <button class="cta-button" type="submit">Submit intake</button>
+            <a class="cta-link" href="mailto:admin@rapiprintdesignworks.com">Or email sketches to admin@rapiprintdesignworks.com</a>
+          </div>
+
+          <p class="muted-note" style="margin-top:10px">Note: replace the form action with your server or Formspree endpoint if you want submissions routed automatically. File uploads require an endpoint that supports multipart/form-data.</p>
         </form>
-        <p class="muted-note">Alternatively email sketches to <a href="mailto:admin@rapiprintdesignworks.com">admin@rapiprintdesignworks.com</a></p>
+
       </div>
     </div>
   </div>
