@@ -1,0 +1,51 @@
+/* Carousel layout fixes — overrides to ensure horizontal track and responsive sizing */
+.carousel {
+  margin: 0 auto;
+  max-width: 1100px;
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+  padding: 0;
+}
+
+.carousel-track {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  transition: transform .5s cubic-bezier(.22,.9,.28,1);
+  will-change: transform;
+  gap: 0;
+}
+
+.carousel-slide {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  display: block;
+}
+
+.carousel-slide .slide-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 12px;
+}
+
+.carousel-slide img {
+  width: auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+  object-fit: none !important;
+  display: block;
+  margin: 0 auto;
+}
+
+.carousel-dots { z-index: 10; }
+.carousel-control { z-index: 10; }
+
+@media(max-width:960px){ .carousel { max-width: 92%; } }
+@media(max-width:600px){ .carousel { max-width: 96%; } }
