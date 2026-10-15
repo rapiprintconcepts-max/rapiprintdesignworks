@@ -13,33 +13,119 @@ title: Portfolio
 
 <section class="portfolio-gallery">
   <div class="container">
-    <div class="gallery-grid">
-      <figure class="gallery-item">
-        <a href="/printed%20american%20flag.jpg" data-lightbox data-title="Printed American Flag">
+    <div class="carousel" id="portfolioCarousel" aria-roledescription="carousel">
+      <div class="carousel-track">
+        <figure class="carousel-slide" data-title="Printed American Flag">
           <img src="/printed%20american%20flag.jpg" alt="Printed American flag display project">
-        </a>
-        <figcaption>Printed American Flag<br><small>Display piece</small></figcaption>
-      </figure>
-      <figure class="gallery-item">
-        <a href="/john%20deere%20puzzle%20frame.jpg" data-lightbox data-title="John Deere Puzzle Frame">
+          <figcaption>Printed American Flag<br><small>Display piece</small></figcaption>
+        </figure>
+
+        <figure class="carousel-slide" data-title="John Deere Puzzle Frame">
           <img src="/john%20deere%20puzzle%20frame.jpg" alt="John Deere puzzle frame project">
-        </a>
-        <figcaption>John Deere Puzzle Frame<br><small>Custom framing</small></figcaption>
-      </figure>
-      <figure class="gallery-item">
-        <a href="/Sunlu%20PETG%20tan%20plant.png" data-lightbox data-title="PETG Plant Holder">
+          <figcaption>John Deere Puzzle Frame<br><small>Custom framing</small></figcaption>
+        </figure>
+
+        <figure class="carousel-slide" data-title="Plant Stand">
           <img src="/Sunlu%20PETG%20tan%20plant.png" alt="Tan plant stand print project">
-        </a>
-        <figcaption>Plant Stand<br><small>PetG fabrication</small></figcaption>
-      </figure>
-      <figure class="gallery-item">
-        <a href="/Slightly%20larger,%20thi.png" data-lightbox data-title="Scaled Prototype">
+          <figcaption>Plant Stand<br><small>PETG fabrication</small></figcaption>
+        </figure>
+
+        <figure class="carousel-slide" data-title="Scaled Prototype">
           <img src="/Slightly%20larger,%20thi.png" alt="Larger functional prototype">
-        </a>
-        <figcaption>Scaled Prototype<br><small>Design iteration</small></figcaption>
-      </figure>
+          <figcaption>Scaled Prototype<br><small>Design iteration</small></figcaption>
+        </figure>
+      </div>
+
+      <button class="carousel-control carousel-prev" aria-label="Previous slide">‹</button>
+      <button class="carousel-control carousel-next" aria-label="Next slide">›</button>
+      <div class="carousel-dots" aria-hidden="false"></div>
     </div>
   </div>
 </section>
 
 <section class="cta-wide"><div class="container"><h2>Want to see more?</h2><p>Contact us with your project details and we’ll show you relevant examples.</p><a class="cta-button" href="/contact.html#intake">Start a Project</a></div></section>
+
+<script>
+(function () {
+  const carousel = document.getElementById('portfolioCarousel');
+  if (!carousel) return;
+
+  const track = carousel.querySelector('.carousel-track');
+  const slides = Array.from(carousel.querySelectorAll('.carousel-slide'));
+  const prev = carousel.querySelector('.carousel-prev');
+  const next = carousel.querySelector('.carousel-next');
+  const dotsContainer = carousel.querySelector('.carousel-dots');
+
+  let current = 0;
+  const slideCount = slides.length;
+  const autoplayDelay = 3500; // ms
+  let autoplayId = null;
+
+  // build dots
+  slides.forEach((_, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'carousel-dot';
+    btn.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+    btn.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(btn);
+  });
+
+  const dots = Array.from(dotsContainer.children);
+
+  function update() {
+    const offset = -current * 100;
+    track.style.transform = `translateX(${offset}%)`;
+    slides.forEach((s, i) => s.setAttribute('aria-hidden', i === current ? 'false' : 'true'));
+    dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
+  }
+
+  function goTo(index) {
+    current = (index + slideCount) % slideCount;
+    update();
+    restartAutoplay();
+  }
+
+  function nextSlide() { goTo(current + 1); }
+  function prevSlide() { goTo(current - 1); }
+
+  next.addEventListener('click', nextSlide);
+  prev.addEventListener('click', prevSlide);
+
+  // autoplay
+  function startAutoplay() {
+    if (autoplayId) return;
+    autoplayId = setInterval(nextSlide, autoplayDelay);
+  }
+  function stopAutoplay() {
+    if (!autoplayId) return;
+    clearInterval(autoplayId);
+    autoplayId = null;
+  }
+  function restartAutoplay() { stopAutoplay(); startAutoplay(); }
+
+  carousel.addEventListener('mouseenter', stopAutoplay);
+  carousel.addEventListener('focusin', stopAutoplay);
+  carousel.addEventListener('mouseleave', startAutoplay);
+  carousel.addEventListener('focusout', startAutoplay);
+
+  // touch support
+  let startX = null;
+  track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; stopAutoplay(); });
+  track.addEventListener('touchend', e => {
+    if (startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 40) dx < 0 ? nextSlide() : prevSlide();
+    startX = null; startAutoplay();
+  });
+
+  // keyboard
+  carousel.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') prevSlide();
+    if (e.key === 'ArrowRight') nextSlide();
+  });
+
+  // initial
+  update();
+  startAutoplay();
+})();
+</script>
