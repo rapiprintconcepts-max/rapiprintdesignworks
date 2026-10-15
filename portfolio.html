@@ -16,22 +16,30 @@ title: Portfolio
     <div class="carousel" id="portfolioCarousel" aria-roledescription="carousel">
       <div class="carousel-track">
         <figure class="carousel-slide" data-title="Printed American Flag">
-          <img src="/printed%20american%20flag.jpg" alt="Printed American flag display project">
+          <div class="slide-inner">
+            <img src="/printed%20american%20flag.jpg" alt="Printed American flag display project">
+          </div>
           <figcaption>Printed American Flag<br><small>Display piece</small></figcaption>
         </figure>
 
         <figure class="carousel-slide" data-title="John Deere Puzzle Frame">
-          <img src="/john%20deere%20puzzle%20frame.jpg" alt="John Deere puzzle frame project">
+          <div class="slide-inner">
+            <img src="/john%20deere%20puzzle%20frame.jpg" alt="John Deere puzzle frame project">
+          </div>
           <figcaption>John Deere Puzzle Frame<br><small>Custom framing</small></figcaption>
         </figure>
 
         <figure class="carousel-slide" data-title="Plant Stand">
-          <img src="/Sunlu%20PETG%20tan%20plant.png" alt="Tan plant stand print project">
+          <div class="slide-inner">
+            <img src="/Sunlu%20PETG%20tan%20plant.png" alt="Tan plant stand print project">
+          </div>
           <figcaption>Plant Stand<br><small>PETG fabrication</small></figcaption>
         </figure>
 
         <figure class="carousel-slide" data-title="Scaled Prototype">
-          <img src="/Slightly%20larger,%20thi.png" alt="Larger functional prototype">
+          <div class="slide-inner">
+            <img src="/Slightly%20larger,%20thi.png" alt="Larger functional prototype">
+          </div>
           <figcaption>Scaled Prototype<br><small>Design iteration</small></figcaption>
         </figure>
       </div>
@@ -58,10 +66,10 @@ title: Portfolio
 
   let current = 0;
   const slideCount = slides.length;
-  const autoplayDelay = 3500; // ms
+  const autoplayDelay = 3500;
   let autoplayId = null;
 
-  // build dots
+  dotsContainer.innerHTML = '';
   slides.forEach((_, i) => {
     const btn = document.createElement('button');
     btn.className = 'carousel-dot';
@@ -72,10 +80,20 @@ title: Portfolio
 
   const dots = Array.from(dotsContainer.children);
 
+  function sizeSlides() {
+    const w = carousel.clientWidth;
+    slides.forEach(s => {
+      s.style.minWidth = w + 'px';
+      s.style.maxWidth = w + 'px';
+    });
+  }
+
   function update() {
-    // Use pixel-based translation based on the carousel visible width to avoid percent/misalignment
-    const slideWidth = carousel.clientWidth;
-    const offsetPx = -current * slideWidth;
+    const currentSlide = slides[current];
+    const carouselW = carousel.clientWidth;
+    const slideW = currentSlide.getBoundingClientRect().width;
+    const desiredLeft = Math.round((carouselW - slideW) / 2);
+    const offsetPx = Math.round(desiredLeft - currentSlide.offsetLeft);
     track.style.transform = `translateX(${offsetPx}px)`;
 
     slides.forEach((s, i) => s.setAttribute('aria-hidden', i === current ? 'false' : 'true'));
@@ -94,16 +112,17 @@ title: Portfolio
   next.addEventListener('click', nextSlide);
   prev.addEventListener('click', prevSlide);
 
-  // autoplay
   function startAutoplay() {
     if (autoplayId) return;
     autoplayId = setInterval(nextSlide, autoplayDelay);
   }
+
   function stopAutoplay() {
     if (!autoplayId) return;
     clearInterval(autoplayId);
     autoplayId = null;
   }
+
   function restartAutoplay() { stopAutoplay(); startAutoplay(); }
 
   carousel.addEventListener('mouseenter', stopAutoplay);
@@ -111,7 +130,6 @@ title: Portfolio
   carousel.addEventListener('mouseleave', startAutoplay);
   carousel.addEventListener('focusout', startAutoplay);
 
-  // touch support
   let startX = null;
   track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; stopAutoplay(); });
   track.addEventListener('touchend', e => {
@@ -121,19 +139,17 @@ title: Portfolio
     startX = null; startAutoplay();
   });
 
-  // keyboard
   carousel.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft') prevSlide();
     if (e.key === 'ArrowRight') nextSlide();
   });
 
-  // handle resize: ensure translate matches new widths and keep current slide centered
   window.addEventListener('resize', () => {
-    // small delay to allow layout to settle
+    sizeSlides();
     requestAnimationFrame(update);
   });
 
-  // initial
+  sizeSlides();
   update();
   startAutoplay();
 })();
