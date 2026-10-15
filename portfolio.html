@@ -42,6 +42,32 @@ title: Portfolio
           </div>
           <figcaption>Scaled Prototype<br><small>Design iteration</small></figcaption>
         </figure>
+
+        <!-- New assets from /assets added below -->
+        <figure class="carousel-slide" data-title="Shop Photo: 2025-01-11">
+          <div class="slide-inner">
+            <img src="/assets/IMG_20250111_132030.jpg" alt="Shop photo 2025-01-11">
+          </div>
+          <figcaption>Shop Photo<br><small>Bench capture</small></figcaption>
+        </figure>
+
+        <figure class="carousel-slide" data-title="Shop Photo: 2025-05-24">
+          <div class="slide-inner">
+            <img src="/assets/IMG_20250524_125609929.jpg" alt="Shop photo 2025-05-24">
+          </div>
+          <figcaption>Shop Photo<br><small>Assembly preview</small></figcaption>
+        </figure>
+
+        <figure class="carousel-slide" data-title="Planter Spiral (Video)">
+          <div class="slide-inner">
+            <video controls playsinline preload="metadata">
+              <source src="/assets/Planter_spiral_1-Large_Solid1736051504322.mp4" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          <figcaption>Planter Spiral<br><small>Process clip</small></figcaption>
+        </figure>
+
       </div>
 
       <button class="carousel-control carousel-prev" aria-label="Previous slide">‹</button>
@@ -69,7 +95,6 @@ title: Portfolio
   const autoplayDelay = 3500;
   let autoplayId = null;
 
-  // build dots
   dotsContainer.innerHTML = '';
   slides.forEach((_, i) => {
     const btn = document.createElement('button');
@@ -81,16 +106,21 @@ title: Portfolio
 
   const dots = Array.from(dotsContainer.children);
 
-  // ensure slides are exactly the carousel viewport width
   function sizeSlides() {
     const w = carousel.clientWidth;
     slides.forEach(s => {
       s.style.minWidth = w + 'px';
       s.style.maxWidth = w + 'px';
+      // Ensure media inside can resize properly
+      const media = s.querySelector('img, video');
+      if (media) {
+        media.style.maxWidth = '100%';
+        media.style.height = 'auto';
+        media.style.display = 'block';
+      }
     });
   }
 
-  // adjust carousel height to match current slide content (image + caption)
   function adjustHeight() {
     const currentSlide = slides[current];
     if (!currentSlide) return;
@@ -99,7 +129,6 @@ title: Portfolio
     const innerRect = inner.getBoundingClientRect();
     const captionRect = caption ? caption.getBoundingClientRect() : { height: 0 };
     const total = Math.ceil(innerRect.height + (captionRect.height || 0));
-    // apply min-height to avoid collapsing during transitions
     carousel.style.height = total + 'px';
   }
 
@@ -114,8 +143,6 @@ title: Portfolio
     slides.forEach((s, i) => s.setAttribute('aria-hidden', i === current ? 'false' : 'true'));
     dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
 
-    // after positioning, adjust the carousel height to fit the image
-    // use requestAnimationFrame to ensure layout is settled
     requestAnimationFrame(adjustHeight);
   }
 
@@ -131,16 +158,17 @@ title: Portfolio
   next.addEventListener('click', nextSlide);
   prev.addEventListener('click', prevSlide);
 
-  // autoplay
   function startAutoplay() {
     if (autoplayId) return;
     autoplayId = setInterval(nextSlide, autoplayDelay);
   }
+
   function stopAutoplay() {
     if (!autoplayId) return;
     clearInterval(autoplayId);
     autoplayId = null;
   }
+
   function restartAutoplay() { stopAutoplay(); startAutoplay(); }
 
   carousel.addEventListener('mouseenter', stopAutoplay);
@@ -148,7 +176,6 @@ title: Portfolio
   carousel.addEventListener('mouseleave', startAutoplay);
   carousel.addEventListener('focusout', startAutoplay);
 
-  // touch support
   let startX = null;
   track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; stopAutoplay(); });
   track.addEventListener('touchend', e => {
@@ -158,31 +185,24 @@ title: Portfolio
     startX = null; startAutoplay();
   });
 
-  // keyboard
   carousel.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft') prevSlide();
     if (e.key === 'ArrowRight') nextSlide();
   });
 
-  // Re-calc sizes and height on window resize
   window.addEventListener('resize', () => {
     sizeSlides();
     requestAnimationFrame(() => { update(); });
   });
 
-  // Recalculate when images load in case sizes change after network load
   slides.forEach(s => {
-    const img = s.querySelector('img');
-    if (img) {
-      if (img.complete) {
-        // already loaded
-        // no-op here; we'll size on init
-      } else {
-        img.addEventListener('load', () => {
-          sizeSlides();
-          update();
-        });
-      }
+    const media = s.querySelector('img, video');
+    if (media && media.tagName.toLowerCase() === 'img') {
+      const img = media;
+      if (!img.complete) img.addEventListener('load', () => { sizeSlides(); update(); });
+    } else if (media && media.tagName.toLowerCase() === 'video') {
+      // ensure metadata load triggers sizing
+      media.addEventListener('loadedmetadata', () => { sizeSlides(); update(); });
     }
   });
 
