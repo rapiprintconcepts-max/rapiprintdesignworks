@@ -170,6 +170,27 @@ title: Contact
 <script>
 function isoNow() { return new Date().toISOString(); }
 
+function safeEncodeBody(text) {
+  // normalize newlines to CRLF (some mail clients expect CRLF) then encode
+  return encodeURIComponent(text.replace(/\r?\n/g, '\r\n'));
+}
+
+function openMailto(mailto) {
+  // Try clicking an anchor first (more reliable across clients), then fallback to setting location
+  try {
+    const a = document.createElement('a');
+    a.href = mailto;
+    a.style.display = 'none';
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); }, 100);
+    return true;
+  } catch (err) {
+    try { window.location.href = mailto; return true; } catch (e) { return false; }
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   const form = document.querySelector('.intake-form');
   if (!form) return;
@@ -203,7 +224,6 @@ document.addEventListener('DOMContentLoaded', function () {
       else lines.push(label + ': ' + v.join(', '));
     }
 
-    // Include a submission timestamp so the meta date is preserved
     lines.push('Submitted at (UTC): ' + isoNow());
 
     push('customer_name', 'Customer name');
@@ -236,9 +256,32 @@ document.addEventListener('DOMContentLoaded', function () {
     const subject = 'RDW intake form — ' + (fd.get('customer_name') || fd.get('part_name') || 'New submission');
     const body = lines.join('\n');
 
-    const mailto = 'mailto:' + encodeURIComponent(recipient) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    const encodedBody = safeEncodeBody(body);
+    const mailto = 'mailto:' + encodeURIComponent(recipient) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodedBody;
 
-    window.location.href = mailto;
+    // If mailto URL is very long, provide a downloadable text file fallback and open a short mailto
+    if (mailto.length > 2000) {
+      // create a downloadable text file with the full body
+      const blob = new Blob([body], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const dl = document.createElement('a');
+      dl.href = url;
+      dl.download = 'RDW-intake.txt';
+      dl.style.display = 'none';
+      document.body.appendChild(dl);
+      dl.click();
+      setTimeout(() => { URL.revokeObjectURL(url); dl.remove(); }, 1500);
+
+      const shortBody = encodeURIComponent('Please see attached RDW-intake.txt for full submission details.');
+      const shortMailto = 'mailto:' + encodeURIComponent(recipient) + '?subject=' + encodeURIComponent(subject) + '&body=' + shortBody;
+      openMailto(shortMailto);
+      return;
+    }
+
+    const ok = openMailto(mailto);
+    if (!ok) {
+      alert('Could not open your mail client automatically. Please copy the form text manually and send to ' + recipient + '.');
+    }
   });
 });
 </script>
