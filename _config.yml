@@ -1,0 +1,9 @@
+# Keep the Cloudflare Worker source in the repo but out of the published site.
+exclude:
+  - worker/
+  - README.md
+  - CNAME.bak
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/
