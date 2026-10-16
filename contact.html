@@ -24,7 +24,8 @@ title: Contact
         <h3 id="intake">Project intake form</h3>
         <p>Please fill the form below with as much detail as you have. Attach photos or sketches if possible.</p>
 
-        <form action="#" method="POST" enctype="multipart/form-data" class="intake-form" novalidate>
+        <!-- Power Automate multipart/form-data intake form -->
+        <form id="intakeForm" enctype="multipart/form-data" method="POST" novalidate>
 
           <fieldset>
             <legend>Customer information</legend>
@@ -159,7 +160,7 @@ title: Contact
             <a class="cta-link" href="mailto:admin@rapiprintdesignworks.com">Or email sketches to admin@rapiprintdesignworks.com</a>
           </div>
 
-          <p class="muted-note" style="margin-top:10px">Note: this form will open your email client with a prefilled message; attach files manually in your mail client after the compose window opens. The recipient address is taken from the contact email on the page so updating that email keeps submissions working.</p>
+          <p class="muted-note" style="margin-top:10px">Note: this form will open your email client with a prefilled message; attach files manually in your mail client after the compose window op[...]</p>
         </form>
 
       </div>
@@ -309,88 +310,4 @@ function buildHtmlAndText(fd) {
   htmlLines.push('<p><strong>Short reference:</strong> ' + escapeHtml(shortRef) + '</p>');
 
   htmlLines.push('<hr>');
-  htmlLines.push('<p>Form submitted from: <a href="' + escapeHtml(window.location.href) + '">' + escapeHtml(window.location.href) + '</a></p>');
-  lines.push('---');
-  lines.push('Form submitted from: ' + window.location.href);
-
-  return { html: '<html><body>' + htmlLines.join('\n') + '</body></html>', text: lines.join('\n') };
-}
-
-function escapeHtml(str) {
-  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-  const form = document.querySelector('.intake-form');
-  if (!form) return;
-
-  function getRecipient() {
-    const pageMail = document.querySelector('.contact-intro a[href^="mailto:"]') || document.querySelector('footer a[href^="mailto:"]') || document.querySelector('a[href^="mailto:"]');
-    if (pageMail) {
-      return (pageMail.getAttribute('href') || '').replace(/^mailto:/i, '') || 'admin@rapiprintdesignworks.com';
-    }
-    return 'admin@rapiprintdesignworks.com';
-  }
-
-  function collectCheckedValues(formData, name) {
-    return formData.getAll(name).filter(Boolean);
-  }
-
-  form.addEventListener('submit', async function (e) {
-    e.preventDefault();
-
-    const recipient = getRecipient();
-
-    if (!confirm('This will open your email client to send the intake message. Files must be attached manually in the email compose window. Continue?')) return;
-
-    const fd = new FormData(form);
-
-    const { html, text } = buildHtmlAndText(fd);
-
-    const didCopy = await writeClipboardHtml(html, text).catch(() => false);
-
-    if (didCopy) {
-      // Inform the user that rich HTML was copied to clipboard and they should paste into the email body
-      alert('The formatted intake text (HTML) has been copied to your clipboard. When your email compose window opens, paste into the body (Ctrl/Cmd+V) to preserve formatting.');
-    } else {
-      // If we couldn't copy, fall back to downloadable HTML and short mailto
-      const blob = new Blob([html], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const dl = document.createElement('a');
-      dl.href = url;
-      dl.download = 'RDW-intake.html';
-      document.body.appendChild(dl);
-      dl.click();
-      setTimeout(() => { URL.revokeObjectURL(url); dl.remove(); }, 1500);
-      alert('Could not copy rich text to clipboard. A RDW-intake.html file was downloaded — attach this file to your email.');
-    }
-
-    const subject = 'RDW intake form — ' + (fd.get('customer_name') || fd.get('part_name') || 'New submission');
-    // include a short plain-text summary in the mailto body so clients that accept it show something
-    const shortBody = text.split('\n').slice(0, 20).join('\n');
-    const encodedBody = safeEncodeBody(shortBody);
-    const mailto = 'mailto:' + encodeURIComponent(recipient) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodedBody;
-
-    // If mailto URL is very long, provide a downloadable text file fallback and open a short mailto
-    if (mailto.length > 2000) {
-      const blob2 = new Blob([text], { type: 'text/plain' });
-      const url2 = URL.createObjectURL(blob2);
-      const dl2 = document.createElement('a');
-      dl2.href = url2;
-      dl2.download = 'RDW-intake.txt';
-      document.body.appendChild(dl2);
-      dl2.click();
-      setTimeout(() => { URL.revokeObjectURL(url2); dl2.remove(); }, 1500);
-
-      const shortMailto = 'mailto:' + encodeURIComponent(recipient) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent('Please see attached RDW-intake.txt for full submission details.');
-      openMailto(shortMailto);
-      return;
-    }
-
-    const ok = openMailto(mailto);
-    if (!ok) {
-      alert('Could not open your mail client automatically. Please paste the copied content into an email to ' + recipient + '.');
-    }
-  });
-});
-</script>
+  htmlLines.push('<p>Form submitted from: <a href="
