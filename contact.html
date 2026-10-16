@@ -24,7 +24,6 @@ title: Contact
         <h3 id="intake">Project intake form</h3>
         <p>Please fill the form below with as much detail as you have. Attach photos or sketches if possible.</p>
 
-        <!-- Power Automate multipart/form-data intake form -->
         <form id="intakeForm" enctype="multipart/form-data" method="POST" novalidate>
 
           <fieldset>
@@ -64,16 +63,16 @@ title: Contact
 
             <div style="margin-top:8px">
               <div style="font-weight:700;margin-bottom:6px">Material (if known)</div>
-              <label for="material_plastic"><input id="material_plastic" type="checkbox" name="material[]" value="Plastic"> Plastic</label> &nbsp;
-              <label for="material_metal"><input id="material_metal" type="checkbox" name="material[]" value="Metal"> Metal</label> &nbsp;
-              <label for="material_rubber"><input id="material_rubber" type="checkbox" name="material[]" value="Rubber"> Rubber</label> &nbsp;
-              <label for="material_composite"><input id="material_composite" type="checkbox" name="material[]" value="Composite"> Composite</label> &nbsp;
-              <label for="material_unknown"><input id="material_unknown" type="checkbox" name="material[]" value="Unknown"> Unknown</label>
+              <label for="material_plastic"><input id="material_plastic" type="checkbox" name="material" value="Plastic"> Plastic</label> &nbsp;
+              <label for="material_metal"><input id="material_metal" type="checkbox" name="material" value="Metal"> Metal</label> &nbsp;
+              <label for="material_rubber"><input id="material_rubber" type="checkbox" name="material" value="Rubber"> Rubber</label> &nbsp;
+              <label for="material_composite"><input id="material_composite" type="checkbox" name="material" value="Composite"> Composite</label> &nbsp;
+              <label for="material_unknown"><input id="material_unknown" type="checkbox" name="material" value="Unknown"> Unknown</label>
             </div>
           </fieldset>
 
           <fieldset>
-            <legend>Fit & function</legend>
+            <legend>Fit &amp; function</legend>
 
             <div>
               <div style="font-weight:700;margin-bottom:6px">Does it mate with other parts?</div>
@@ -87,80 +86,79 @@ title: Contact
               <label for="have_mating_part_no"><input id="have_mating_part_no" type="radio" name="have_mating_part" value="No"> No</label>
             </div>
 
-            <label for="function_desc" style="display:block;margin-top:8px">What does the part do / what is its function?<br>
-              <textarea id="function_desc" name="function_desc" rows="4" placeholder="Explain how the part is used and what it must do"></textarea>
+            <label for="part_function" style="display:block;margin-top:8px">What does the part do / what is its function?<br>
+              <textarea id="part_function" name="part_function" rows="4" placeholder="Explain how the part is used and what it must do"></textarea>
             </label>
           </fieldset>
 
           <fieldset>
             <legend>Service needed</legend>
 
-            <label for="service_scan"><input id="service_scan" type="checkbox" name="service[]" value="Scan Only"> Scan Only</label><br>
-            <label for="service_cleaned"><input id="service_cleaned" type="checkbox" name="service[]" value="Cleaned Mesh"> Cleaned Mesh</label><br>
-            <label for="service_cad"><input id="service_cad" type="checkbox" name="service[]" value="CAD Model"> CAD Model</label><br>
-            <label for="service_replacement"><input id="service_replacement" type="checkbox" name="service[]" value="Replacement Part"> Replacement Part</label><br>
-            <label for="service_redesign"><input id="service_redesign" type="checkbox" name="service[]" value="Redesign"> Redesign</label>
+            <label for="service_scan"><input id="service_scan" type="checkbox" name="service" value="Scan Only"> Scan Only</label><br>
+            <label for="service_cleaned"><input id="service_cleaned" type="checkbox" name="service" value="Cleaned Mesh"> Cleaned Mesh</label><br>
+            <label for="service_cad"><input id="service_cad" type="checkbox" name="service" value="CAD Model"> CAD Model</label><br>
+            <label for="service_replacement"><input id="service_replacement" type="checkbox" name="service" value="Replacement Part"> Replacement Part</label><br>
+            <label for="service_redesign"><input id="service_redesign" type="checkbox" name="service" value="Redesign"> Redesign</label>
           </fieldset>
 
           <fieldset>
-            <legend>Accuracy & timeline</legend>
+            <legend>Accuracy &amp; timeline</legend>
 
             <div style="margin-bottom:8px">
               <div style="font-weight:700;margin-bottom:6px">Accuracy needed</div>
               <label for="accuracy_standard"><input id="accuracy_standard" type="radio" name="accuracy" value="Standard"> Standard</label> &nbsp;
               <label for="accuracy_high"><input id="accuracy_high" type="radio" name="accuracy" value="High"> High</label> &nbsp;
-              <label for="accuracy_tight"><input id="accuracy_tight" type="radio" name="accuracy" value="Tight / OEM"> Tight / OEM</label>
+              <label for="accuracy_tight"><input id="accuracy_tight" type="radio" name="accuracy" value="Tight/OEM"> Tight / OEM</label>
             </div>
 
             <div>
               <div style="font-weight:700;margin-bottom:6px">Timeline</div>
-              <label for="timeline_standard"><input id="timeline_standard" type="radio" name="timeline_type" value="Standard"> Standard</label> &nbsp;
-              <label for="timeline_rush"><input id="timeline_rush" type="radio" name="timeline_type" value="Rush"> Rush</label>
+              <label for="timeline_standard"><input id="timeline_standard" type="radio" name="timeline" value="Standard"> Standard</label> &nbsp;
+              <label for="timeline_rush"><input id="timeline_rush" type="radio" name="timeline" value="Rush"> Rush</label>
             </div>
           </fieldset>
 
           <fieldset>
             <legend>Photos / attachments</legend>
 
-            <label for="part_photos">Photos of the part (optional) — upload (multiple allowed)<br>
-              <input id="part_photos" name="part_photos[]" type="file" accept="image/*" multiple>
+            <label for="part_photos">Photos of the part (optional) — multiple allowed<br>
+              <input id="part_photos" name="part_photos" type="file" accept="image/*" multiple>
             </label>
 
-            <label for="assembly_photos" style="display:block;margin-top:8px">Photos of the assembly (optional) — upload (multiple allowed)<br>
-              <input id="assembly_photos" name="assembly_photos[]" type="file" accept="image/*" multiple>
+            <label for="assembly_photos" style="display:block;margin-top:8px">Photos of the assembly (optional) — multiple allowed<br>
+              <input id="assembly_photos" name="assembly_photos" type="file" accept="image/*" multiple>
             </label>
 
-            <label for="other_files" style="display:block;margin-top:8px">Other files (drawings, STLs, PDFs) — upload (multiple allowed)<br>
-              <input id="other_files" name="other_files[]" type="file" accept=".pdf,.stl,.zip" multiple>
+            <label for="other_files" style="display:block;margin-top:8px">Other files (drawings, STLs, PDFs) — multiple allowed<br>
+              <input id="other_files" name="other_files" type="file" accept=".pdf,.stl,.zip,.step,.stp,.dwg,.dxf,image/*" multiple>
             </label>
-
           </fieldset>
 
           <fieldset>
             <legend>Additional notes</legend>
+
             <label for="additional_notes" style="display:block">Any extra notes, constraints, or reference numbers<br>
               <textarea id="additional_notes" name="additional_notes" rows="6" placeholder="Add any extra information here"></textarea>
             </label>
 
-            <!-- editable short word field as requested -->
-            <label for="additional_short" style="display:block;margin-top:8px">Short reference / keyword (editable)<br>
-              <input id="additional_short" name="additional_short" type="text" placeholder="Reference or keyword">
+            <label for="short_reference" style="display:block;margin-top:8px">Short reference / keyword<br>
+              <input id="short_reference" name="short_reference" type="text" placeholder="Reference or keyword">
             </label>
           </fieldset>
 
-          <label for="consent_checkbox" style="display:block;margin-top:8px;">
-            <input id="consent_checkbox" type="checkbox" name="consent" required> I agree to be contacted about this inquiry.
+          <label for="consent" style="display:block;margin-top:8px;">
+            <input id="consent" name="consent" type="checkbox"> I agree to be contacted about this inquiry.
           </label>
 
-          <input type="hidden" name="_subject" value="RDW intake form submission">
-          <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="nope">
+          <!-- Honeypot: real users never see or fill this -->
+          <input type="text" id="website" name="website" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true">
 
           <div style="margin-top:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-            <button class="cta-button" type="submit">Submit intake</button>
+            <button id="submitBtn" class="cta-button" type="submit">Submit intake</button>
             <a class="cta-link" href="mailto:admin@rapiprintdesignworks.com">Or email sketches to admin@rapiprintdesignworks.com</a>
           </div>
 
-          <p class="muted-note" style="margin-top:10px">Note: this form will open your email client with a prefilled message; attach files manually in your mail client after the compose window op[...]</p>
+          <p id="formStatus" role="status" aria-live="polite" style="margin-top:10px"></p>
         </form>
 
       </div>
@@ -169,145 +167,134 @@ title: Contact
 </section>
 
 <script>
-function isoNow() { return new Date().toISOString(); }
+(function () {
+  // ---- CONFIG -------------------------------------------------------------
+  // Replace with your deployed Cloudflare Worker URL.
+  var WORKER_URL = "https://rdw-intake.YOUR-SUBDOMAIN.workers.dev";
+  var MAX_TOTAL_BYTES = 90 * 1024 * 1024; // keep in sync with MAX_BYTES in the Worker
+  // -------------------------------------------------------------------------
 
-function safeEncodeBody(text) {
-  // normalize newlines to CRLF (some mail clients expect CRLF) then encode
-  return encodeURIComponent(text.replace(/\r?\n/g, '\r\n'));
-}
+  var form = document.getElementById("intakeForm");
+  if (!form) return;
 
-function openMailto(mailto) {
-  // Try clicking an anchor first (more reliable across clients), then fallback to setting location
-  try {
-    const a = document.createElement('a');
-    a.href = mailto;
-    a.style.display = 'none';
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => { document.body.removeChild(a); }, 100);
-    return true;
-  } catch (err) {
-    try { window.location.href = mailto; return true; } catch (e) { return false; }
+  var submitBtn = document.getElementById("submitBtn");
+  var statusEl = document.getElementById("formStatus");
+  var FILE_FIELDS = ["part_photos", "assembly_photos", "other_files"];
+
+  function setStatus(message, isError) {
+    statusEl.textContent = message;
+    statusEl.style.color = isError ? "#b00020" : "#1b5e20";
   }
-}
 
-async function writeClipboardHtml(html, text) {
-  if (navigator.clipboard && navigator.clipboard.write) {
-    try {
-      const blobHtml = new Blob([html], { type: 'text/html' });
-      const blobText = new Blob([text], { type: 'text/plain' });
-      const item = new ClipboardItem({ 'text/html': blobHtml, 'text/plain': blobText });
-      await navigator.clipboard.write([item]);
-      return true;
-    } catch (err) {
-      // fall through to plain-text fallback
+  function val(name) {
+    var el = form.elements[name];
+    return el && el.value ? el.value.trim() : "";
+  }
+
+  function appendText(fd, name) {
+    fd.append(name, val(name));
+  }
+
+  function appendRadio(fd, name) {
+    var checked = form.querySelector('input[name="' + name + '"]:checked');
+    fd.append(name, checked ? checked.value : "");
+  }
+
+  function appendCheckboxGroup(fd, name) {
+    var values = Array.prototype.map.call(
+      form.querySelectorAll('input[name="' + name + '"]:checked'),
+      function (c) { return c.value; }
+    );
+    values.forEach(function (v) { fd.append(name, v); });
+    fd.append(name + "_list", values.join(", "));
+  }
+
+  function appendFiles(fd, name) {
+    var input = form.elements[name];
+    if (!input || !input.files) return;
+    for (var i = 0; i < input.files.length; i++) {
+      fd.append(name, input.files[i], input.files[i].name);
     }
   }
-  // plain-text fallback using execCommand
-  try {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    ta.remove();
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
 
-function buildHtmlAndText(fd) {
-  const parts = [];
-  function push(name, label) {
-    const v = fd.getAll(name);
-    if (!v || v.length === 0) return;
-    if (v.length === 1) { parts.push({ label, value: v[0] }); }
-    else { parts.push({ label, value: v.join(', ') }); }
+  function totalFileBytes() {
+    var total = 0;
+    FILE_FIELDS.forEach(function (name) {
+      var input = form.elements[name];
+      if (input && input.files) {
+        for (var i = 0; i < input.files.length; i++) total += input.files[i].size;
+      }
+    });
+    return total;
   }
 
-  const lines = [];
-  const htmlLines = [];
+  function validate() {
+    if (!val("customer_name")) return "Please enter your full name.";
+    if (!val("contact")) return "Please enter a phone number or email.";
+    if (!val("part_name")) return "Please enter a part name or short description.";
+    if (!document.getElementById("consent").checked) return "Please agree to be contacted.";
+    if (totalFileBytes() > MAX_TOTAL_BYTES) return "Selected files are too large. Please keep the total under 90 MB.";
+    if (WORKER_URL.indexOf("YOUR-SUBDOMAIN") !== -1) return "Form endpoint is not configured yet.";
+    return null;
+  }
 
-  lines.push('Submitted at (UTC): ' + isoNow());
-  htmlLines.push('<p><em>Submitted at (UTC): ' + isoNow() + '</em></p>');
-  htmlLines.push('<h2>RDW intake submission</h2>');
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
 
-  push('customer_name', 'Customer name');
-  push('contact', 'Phone / Email');
-  push('address', 'Address / Part location');
-  push('business', 'Business / Entity');
-  push('part_name', 'Part name / description');
-
-  // simple retrieval for single fields
-  const ordered = [
-    { key: 'customer_name', label: 'Customer name' },
-    { key: 'contact', label: 'Phone / Email' },
-    { key: 'address', label: 'Address / Part location' },
-    { key: 'business', label: 'Business / Entity' },
-    { key: 'part_name', label: 'Part name / description' }
-  ];
-
-  ordered.forEach(o => {
-    const v = fd.getAll(o.key);
-    if (v && v.length) {
-      lines.push(o.label + ': ' + v.join(', '));
-      htmlLines.push('<p><strong>' + o.label + ':</strong> ' + escapeHtml(v.join(', ')) + '</p>');
+    // Honeypot filled: pretend success, send nothing
+    if (val("website")) {
+      setStatus("Thank you! Your intake was submitted.", false);
+      form.reset();
+      return;
     }
+
+    var error = validate();
+    if (error) { setStatus(error, true); return; }
+
+    var fd = new FormData();
+
+    appendText(fd, "customer_name");
+    appendText(fd, "contact");
+    appendText(fd, "address");
+    appendText(fd, "business");
+    appendText(fd, "part_name");
+    appendText(fd, "part_function");
+    appendText(fd, "additional_notes");
+    appendText(fd, "short_reference");
+
+    appendRadio(fd, "part_condition");
+    appendRadio(fd, "mates_with");
+    appendRadio(fd, "have_mating_part");
+    appendRadio(fd, "accuracy");
+    appendRadio(fd, "timeline");
+
+    appendCheckboxGroup(fd, "material");
+    appendCheckboxGroup(fd, "service");
+
+    fd.append("consent", document.getElementById("consent").checked ? "true" : "false");
+
+    FILE_FIELDS.forEach(function (name) { appendFiles(fd, name); });
+
+    fd.append("submitted_at_utc", new Date().toISOString());
+    fd.append("source_page", window.location.href);
+
+    submitBtn.disabled = true;
+    setStatus("Submitting…", false);
+
+    // No manual Content-Type: the browser sets multipart/form-data with the boundary.
+    fetch(WORKER_URL, { method: "POST", body: fd })
+      .then(function (response) {
+        if (!response.ok) throw new Error("Server responded with status " + response.status);
+        setStatus("Thank you! Your intake was submitted successfully.", false);
+        form.reset();
+      })
+      .catch(function (err) {
+        console.error("Intake submission failed:", err);
+        setStatus("Sorry, something went wrong. Please try again or email admin@rapiprintdesignworks.com.", true);
+      })
+      .then(function () {
+        submitBtn.disabled = false;
+      });
   });
-
-  const partCondition = fd.get('part_condition') || '';
-  lines.push('Part condition: ' + partCondition);
-  htmlLines.push('<p><strong>Part condition:</strong> ' + escapeHtml(partCondition) + '</p>');
-
-  const materials = fd.getAll('material[]').filter(Boolean);
-  lines.push('Material(s): ' + (materials.join(', ') || ''));
-  htmlLines.push('<p><strong>Material(s):</strong> ' + escapeHtml(materials.join(', ')) + '</p>');
-
-  lines.push('Mates with other parts: ' + (fd.get('mates_with') || ''));
-  htmlLines.push('<p><strong>Mates with other parts:</strong> ' + escapeHtml(fd.get('mates_with') || '') + '</p>');
-
-  lines.push('Have mating part: ' + (fd.get('have_mating_part') || ''));
-  htmlLines.push('<p><strong>Have mating part:</strong> ' + escapeHtml(fd.get('have_mating_part') || '') + '</p>');
-
-  const func = fd.get('function_desc') || '';
-  lines.push('Function: ' + func);
-  htmlLines.push('<p><strong>Function / what it does:</strong><br>' + escapeHtml(func).replace(/\n/g, '<br>') + '</p>');
-
-  const services = fd.getAll('service[]').filter(Boolean);
-  lines.push('Service(s) needed: ' + services.join(', '));
-  htmlLines.push('<p><strong>Service(s) needed:</strong> ' + escapeHtml(services.join(', ')) + '</p>');
-
-  lines.push('Accuracy needed: ' + (fd.get('accuracy') || ''));
-  htmlLines.push('<p><strong>Accuracy needed:</strong> ' + escapeHtml(fd.get('accuracy') || '') + '</p>');
-
-  lines.push('Timeline: ' + (fd.get('timeline_type') || ''));
-  htmlLines.push('<p><strong>Timeline:</strong> ' + escapeHtml(fd.get('timeline_type') || '') + '</p>');
-
-  const partFiles = document.getElementById('part_photos');
-  const assemblyFiles = document.getElementById('assembly_photos');
-  const otherFiles = document.getElementById('other_files');
-  if (partFiles && partFiles.files.length) {
-    lines.push('Part photos (selected): ' + Array.from(partFiles.files).map(f => f.name).join(', '));
-    htmlLines.push('<p><strong>Part photos (selected):</strong> ' + escapeHtml(Array.from(partFiles.files).map(f => f.name).join(', ')) + '</p>');
-  }
-  if (assemblyFiles && assemblyFiles.files.length) {
-    lines.push('Assembly photos (selected): ' + Array.from(assemblyFiles.files).map(f => f.name).join(', '));
-    htmlLines.push('<p><strong>Assembly photos (selected):</strong> ' + escapeHtml(Array.from(assemblyFiles.files).map(f => f.name).join(', ')) + '</p>');
-  }
-  if (otherFiles && otherFiles.files.length) {
-    lines.push('Other files (selected): ' + Array.from(otherFiles.files).map(f => f.name).join(', '));
-    htmlLines.push('<p><strong>Other files (selected):</strong> ' + escapeHtml(Array.from(otherFiles.files).map(f => f.name).join(', ')) + '</p>');
-  }
-
-  const additional = fd.get('additional_notes') || '';
-  lines.push('Additional notes: ' + additional);
-  htmlLines.push('<p><strong>Additional notes:</strong><br>' + escapeHtml(additional).replace(/\n/g, '<br>') + '</p>');
-
-  const shortRef = fd.get('additional_short') || '';
-  lines.push('Short reference: ' + shortRef);
-  htmlLines.push('<p><strong>Short reference:</strong> ' + escapeHtml(shortRef) + '</p>');
-
-  htmlLines.push('<hr>');
-  htmlLines.push('<p>Form submitted from: <a href="
+})();
+</script>
