@@ -16,6 +16,7 @@ title: Contact
   .intake-note { margin: 0 0 12px; padding: 10px 12px; border-left: 4px solid #999; background: rgba(128,128,128,0.08); }
   .intake-actions { margin-top: 12px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
   .intake-form input[type="text"], .intake-form textarea { max-width: 100%; box-sizing: border-box; }
+  .intake-form input[readonly] { background: rgba(128,128,128,0.12); cursor: default; font-weight: 700; letter-spacing: 0.02em; }
   #summaryFallback { display: none; width: 100%; box-sizing: border-box; margin-top: 10px; min-height: 180px; }
   #copySuccess { display: none; margin-top: 14px; padding: 14px 16px; border: 2px solid #1b5e20; border-radius: 8px; background: #e8f5e9; color: #1b3d1f; }
   #copySuccess .copy-success-title { font-size: 1.15em; font-weight: 800; margin: 0 0 8px; }
@@ -60,7 +61,11 @@ title: Contact
             <fieldset>
               <legend>Customer information</legend>
 
-              <label for="customer_name" style="display:block">Full name (required)<br>
+              <label for="reference_number" style="display:block">Reference Number<br>
+                <input id="reference_number" name="reference_number" type="text" readonly aria-readonly="true" value="" placeholder="Generating…">
+              </label>
+
+              <label for="customer_name" style="display:block;margin-top:8px">Full name (required)<br>
                 <input id="customer_name" name="customer_name" type="text" required placeholder="Full name">
               </label>
 
@@ -265,6 +270,40 @@ title: Contact
   var statusEl = document.getElementById("formStatus");
   var successEl = document.getElementById("copySuccess");
   var fallbackEl = document.getElementById("summaryFallback");
+  var refInput = document.getElementById("reference_number");
+
+  // ---- Reference number: RDW-YYYYMMDD-HHMM-XXXX ---------------------------
+  function pad(n, width) {
+    var s = String(n);
+    while (s.length < width) s = "0" + s;
+    return s;
+  }
+
+  function randomFourDigits() {
+    // Random integer 1000-9999 (always four digits).
+    var n;
+    if (window.crypto && window.crypto.getRandomValues) {
+      var buf = new Uint32Array(1);
+      window.crypto.getRandomValues(buf);
+      n = 1000 + (buf[0] % 9000);
+    } else {
+      n = 1000 + Math.floor(Math.random() * 9000);
+    }
+    return String(n);
+  }
+
+  function generateReferenceNumber() {
+    var d = new Date();
+    return "RDW-" +
+      d.getFullYear() + pad(d.getMonth() + 1, 2) + pad(d.getDate(), 2) +
+      "-" + pad(d.getHours(), 2) + pad(d.getMinutes(), 2) +
+      "-" + randomFourDigits();
+  }
+
+  // Generated once per page load; never regenerated while the page stays open.
+  var REFERENCE_NUMBER = generateReferenceNumber();
+  if (refInput) refInput.value = REFERENCE_NUMBER;
+  // -------------------------------------------------------------------------
 
   function setStatus(message, isError) {
     statusEl.textContent = message;
@@ -328,6 +367,7 @@ title: Contact
     parts.push(RULE);
     parts.push("");
 
+    parts.push(field("Reference Number", REFERENCE_NUMBER));
     parts.push(field("Customer Name", val("customer_name")));
     parts.push(field("Contact", val("contact")));
     parts.push(field("Business", val("business")));
@@ -353,15 +393,16 @@ title: Contact
     return String(text || "").replace(/\s+/g, " ").trim();
   }
 
-  // RDW Intake | [Part Name] | [Customer Name], with fallbacks for blank values.
+  // RDW Intake | [Reference Number] | [Part Name] | [Customer Name], with fallbacks for blank values.
   function buildSubject() {
     var part = oneLine(val("part_name"));
     var customer = oneLine(val("customer_name"));
+    var subject = "RDW Intake | " + REFERENCE_NUMBER;
 
-    if (!part && !customer) return "RDW Intake | New Reverse Engineering Request";
-    if (!part) return "RDW Intake | New Reverse Engineering Request | " + customer;
-    if (!customer) return "RDW Intake | " + part;
-    return "RDW Intake | " + part + " | " + customer;
+    if (!part && !customer) return subject + " | New Reverse Engineering Request";
+    if (!part) return subject + " | New Reverse Engineering Request | " + customer;
+    if (!customer) return subject + " | " + part;
+    return subject + " | " + part + " | " + customer;
   }
 
   function copyText(text) {
@@ -420,7 +461,8 @@ title: Contact
     var error = validate();
     if (error) { hideSuccess(); setStatus(error, true); return; }
 
-    var body = "Paste your copied intake summary below, then attach your photos and files.\r\n\r\n";
+    var body = "Reference Number: " + REFERENCE_NUMBER + "\r\n\r\n" +
+      "Paste your copied intake summary below, then attach your photos and files.\r\n\r\n";
     var mailto = "mailto:" + RECIPIENT +
       "?subject=" + encodeURIComponent(buildSubject()) +
       "&body=" + encodeURIComponent(body);
