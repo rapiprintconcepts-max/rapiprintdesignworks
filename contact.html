@@ -8,13 +8,20 @@ title: Contact
   .intake-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
   .intake-aside { position: sticky; top: 16px; }
   .intake-aside h3 { margin-top: 0; }
+  .intake-aside h4 { margin: 20px 0 10px; }
   .intake-checklist { list-style: none; margin: 0; padding: 0; }
   .intake-checklist li { margin: 0 0 10px; padding-left: 1.6em; text-indent: -1.6em; }
   .intake-steps { margin: 0 0 12px; padding-left: 1.2em; }
   .intake-steps li { margin-bottom: 4px; }
+  .intake-note { margin: 0 0 12px; padding: 10px 12px; border-left: 4px solid #999; background: rgba(128,128,128,0.08); }
   .intake-actions { margin-top: 12px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
   .intake-form input[type="text"], .intake-form textarea { max-width: 100%; box-sizing: border-box; }
   #summaryFallback { display: none; width: 100%; box-sizing: border-box; margin-top: 10px; min-height: 180px; }
+  #copySuccess { display: none; margin-top: 14px; padding: 14px 16px; border: 2px solid #1b5e20; border-radius: 8px; background: #e8f5e9; color: #1b3d1f; }
+  #copySuccess .copy-success-title { font-size: 1.15em; font-weight: 800; margin: 0 0 8px; }
+  #copySuccess .copy-success-sub { font-weight: 700; margin: 0 0 6px; }
+  #copySuccess ol { margin: 0; padding-left: 1.3em; }
+  #copySuccess li { margin-bottom: 3px; }
   @media (max-width: 900px) {
     .intake-layout { grid-template-columns: 1fr; }
     .intake-aside { position: static; }
@@ -188,9 +195,25 @@ title: Contact
               </ol>
             </div>
 
+            <p class="intake-note"><strong>Note:</strong><br>
+              Files are not transferred through the intake form.<br>
+              After opening your email application, please attach photos, PDFs, drawings, CAD files, STL files, manuals, and any supporting documentation before sending.
+            </p>
+
             <div class="intake-actions">
               <button id="copyBtn" class="cta-button" type="button">Copy Intake Summary</button>
               <button id="emailBtn" class="cta-button" type="button">Open Email</button>
+            </div>
+
+            <div id="copySuccess" role="status" aria-live="polite">
+              <p class="copy-success-title">✅ Intake Summary Copied Successfully</p>
+              <p class="copy-success-sub">Next Steps:</p>
+              <ol>
+                <li>Click "Open Email"</li>
+                <li>Paste the intake summary into the email body</li>
+                <li>Attach photos and supporting files</li>
+                <li>Click Send</li>
+              </ol>
             </div>
 
             <p id="formStatus" role="status" aria-live="polite" style="margin-top:10px"></p>
@@ -213,6 +236,16 @@ title: Contact
             <li>✓ Explain the part's function and the problem that needs solved</li>
             <li>✓ Provide critical dimensions when known</li>
           </ul>
+
+          <h4>Optional Information That Helps Us Deliver Faster</h4>
+          <ul class="intake-checklist">
+            <li>✓ Expected quantity needed</li>
+            <li>✓ Desired material if known</li>
+            <li>✓ Desired turnaround time</li>
+            <li>✓ Existing measurements</li>
+            <li>✓ Known failure history</li>
+            <li>✓ Existing sample part availability</li>
+          </ul>
         </div>
       </aside>
 
@@ -223,21 +256,23 @@ title: Contact
 <script>
 (function () {
   var RECIPIENT = "admin@rapiprintdesignworks.com";
+  var NOT_PROVIDED = "Not provided";
+  var RULE = "=================================";
 
   var form = document.getElementById("intakeForm");
   if (!form) return;
 
   var statusEl = document.getElementById("formStatus");
+  var successEl = document.getElementById("copySuccess");
   var fallbackEl = document.getElementById("summaryFallback");
-  var FILE_FIELDS = [
-    { name: "part_photos", label: "Part photos" },
-    { name: "assembly_photos", label: "Assembly photos" },
-    { name: "other_files", label: "Other files" }
-  ];
 
   function setStatus(message, isError) {
     statusEl.textContent = message;
     statusEl.style.color = isError ? "#b00020" : "#1b5e20";
+  }
+
+  function hideSuccess() {
+    successEl.style.display = "none";
   }
 
   function val(name) {
@@ -257,12 +292,6 @@ title: Contact
     );
   }
 
-  function fileNames(name) {
-    var input = form.elements[name];
-    if (!input || !input.files) return [];
-    return Array.prototype.map.call(input.files, function (f) { return f.name; });
-  }
-
   // Same required fields as before: name, contact, part name, consent.
   function validate() {
     if (!val("customer_name")) return "Please enter your full name.";
@@ -272,73 +301,67 @@ title: Contact
     return null;
   }
 
-  function line(label, value) {
-    return label + ": " + (value || "—");
+  function orNone(value) {
+    return value && String(value).trim() ? String(value).trim() : NOT_PROVIDED;
+  }
+
+  function field(label, value) {
+    return label + ":\n" + orNone(value) + "\n";
+  }
+
+  // "Mating Part Available" also carries whether the part mates with others,
+  // so no existing intake information is lost.
+  function matingSummary() {
+    var have = radio("have_mating_part");
+    var mates = radio("mates_with");
+    if (!have && !mates) return "";
+    var text = have || NOT_PROVIDED;
+    if (mates) text += " (mates with other parts: " + mates + ")";
+    return text;
   }
 
   function buildSummary() {
-    var out = [];
-    out.push("RDW INTAKE SUMMARY");
-    out.push("Generated: " + new Date().toLocaleString());
-    out.push("");
+    var parts = [];
+    parts.push(RULE);
+    parts.push("RAPIPRINT DESIGN WORKS");
+    parts.push("REVERSE ENGINEERING INTAKE");
+    parts.push(RULE);
+    parts.push("");
 
-    out.push("CUSTOMER INFORMATION");
-    out.push(line("Full name", val("customer_name")));
-    out.push(line("Phone / Email", val("contact")));
-    out.push(line("Address / Part location", val("address")));
-    out.push(line("Business / Entity", val("business")));
-    out.push("");
+    parts.push(field("Customer Name", val("customer_name")));
+    parts.push(field("Contact", val("contact")));
+    parts.push(field("Business", val("business")));
+    parts.push(field("Address", val("address")));
+    parts.push(field("Part Name", val("part_name")));
+    parts.push(field("Part Condition", radio("part_condition")));
+    parts.push(field("Material", checks("material").join(", ")));
+    parts.push(field("Service Requested", checks("service").join(", ")));
+    parts.push(field("Mating Part Available", matingSummary()));
+    parts.push(field("Part Function", val("part_function")));
+    parts.push(field("Accuracy Requirement", radio("accuracy")));
+    parts.push(field("Timeline", radio("timeline")));
+    parts.push(field("Additional Notes", val("additional_notes")));
+    parts.push(field("Reference", val("short_reference")));
 
-    out.push("PART DETAILS");
-    out.push(line("Part name / description", val("part_name")));
-    out.push(line("Part condition", radio("part_condition")));
-    out.push(line("Material(s)", checks("material").join(", ")));
-    out.push("");
-
-    out.push("FIT & FUNCTION");
-    out.push(line("Mates with other parts", radio("mates_with")));
-    out.push(line("Have the mating part", radio("have_mating_part")));
-    out.push("Function / problem to solve:");
-    out.push(val("part_function") || "—");
-    out.push("");
-
-    out.push("SERVICE NEEDED");
-    out.push(line("Service(s)", checks("service").join(", ")));
-    out.push("");
-
-    out.push("ACCURACY & TIMELINE");
-    out.push(line("Accuracy needed", radio("accuracy")));
-    out.push(line("Timeline", radio("timeline")));
-    out.push("");
-
-    out.push("FILES TO ATTACH TO THIS EMAIL");
-    var anyFiles = false;
-    FILE_FIELDS.forEach(function (f) {
-      var names = fileNames(f.name);
-      if (names.length) {
-        anyFiles = true;
-        out.push(line(f.label, names.join(", ")));
-      }
-    });
-    if (!anyFiles) out.push("—");
-    out.push("");
-
-    out.push("ADDITIONAL NOTES");
-    out.push(val("additional_notes") || "—");
-    out.push(line("Short reference", val("short_reference")));
-    out.push("");
-
-    out.push("Consent to be contacted: " + (document.getElementById("consent").checked ? "Yes" : "No"));
-    return out.join("\n");
+    parts.push(RULE);
+    parts.push("END OF INTAKE");
+    parts.push(RULE);
+    return parts.join("\n");
   }
 
   function oneLine(text) {
-    return String(text).replace(/\s+/g, " ").trim();
+    return String(text || "").replace(/\s+/g, " ").trim();
   }
 
-  // RDW Intake | [Part Name] | [Customer Name]
+  // RDW Intake | [Part Name] | [Customer Name], with fallbacks for blank values.
   function buildSubject() {
-    return "RDW Intake | " + oneLine(val("part_name")) + " | " + oneLine(val("customer_name"));
+    var part = oneLine(val("part_name"));
+    var customer = oneLine(val("customer_name"));
+
+    if (!part && !customer) return "RDW Intake | New Reverse Engineering Request";
+    if (!part) return "RDW Intake | New Reverse Engineering Request | " + customer;
+    if (!customer) return "RDW Intake | " + part;
+    return "RDW Intake | " + part + " | " + customer;
   }
 
   function copyText(text) {
@@ -370,6 +393,7 @@ title: Contact
   form.addEventListener("submit", function (e) { e.preventDefault(); });
 
   document.getElementById("copyBtn").addEventListener("click", function () {
+    hideSuccess();
     var error = validate();
     if (error) { setStatus(error, true); return; }
 
@@ -377,7 +401,11 @@ title: Contact
     copyText(summary).then(function (ok) {
       if (ok) {
         fallbackEl.style.display = "none";
-        setStatus("Intake summary copied to your clipboard. Next, click \"Open Email\" and paste it into the email body.", false);
+        setStatus("", false);
+        successEl.style.display = "block";
+        if (successEl.scrollIntoView) {
+          successEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
       } else {
         fallbackEl.value = summary;
         fallbackEl.style.display = "block";
@@ -390,7 +418,7 @@ title: Contact
 
   document.getElementById("emailBtn").addEventListener("click", function () {
     var error = validate();
-    if (error) { setStatus(error, true); return; }
+    if (error) { hideSuccess(); setStatus(error, true); return; }
 
     var body = "Paste your copied intake summary below, then attach your photos and files.\r\n\r\n";
     var mailto = "mailto:" + RECIPIENT +
