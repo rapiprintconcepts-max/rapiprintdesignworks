@@ -54,8 +54,9 @@ title: Contact
     <div style="margin-bottom:20px">
       <p class="eyebrow">Contact</p>
       <h2>Rapiprint Design Works</h2>
-      <!-- The email address is not in the page source; it is inserted by JavaScript into #contactEmailSlot. -->
-      <p class="contact-intro">South‑Central Iowa • Small-batch fabrication and practical engineering. Email: <span id="contactEmailSlot">(enable JavaScript to view)</span></p>
+      <!-- The email address is not in the page source. This button stays disabled until Turnstile
+           verification succeeds; clicking it then inserts the address (see /assets/email-reveal.js). -->
+      <p class="contact-intro">South‑Central Iowa • Small-batch fabrication and practical engineering. Email: <button type="button" class="email-reveal-btn" data-email-reveal data-requires-human disabled>Click to Reveal Email</button></p>
       <p class="location-label">Location <small>South‑Central Iowa (pickup &amp; shipping available)</small></p>
     </div>
 
@@ -288,9 +289,12 @@ title: Contact
 <script>
 (function () {
   // ---- Email address: assembled at runtime, never written out in the HTML ----
-  // Produces the intake mailbox address from separate parts.
+  const user = "admin";
+  const domain = "rapiprintdesignworks.com";
+  const MAIL_SCHEME = "mail" + "to:";
+
   function getRecipient() {
-    return ["admin", "rapiprintdesignworks.com"].join("@");
+    return user + "@" + domain;
   }
 
   var NOT_PROVIDED = "Not provided";
@@ -298,11 +302,8 @@ title: Contact
   var LONG_RULE = "================================================";
   var DASH_RULE = "------------------------------------------------";
 
-  // Turnstile site key. IMPORTANT: replace with the real site key for this domain
-  // from the Cloudflare dashboard (Turnstile > Add site). The value below is
-  // Cloudflare's public always-pass TEST key: it makes the widget work during
-  // development but provides NO real bot protection.
-  var TURNSTILE_SITE_KEY = "1x00000000000000000000AA";
+  // Turnstile production site key for this domain.
+  var TURNSTILE_SITE_KEY = "0x4AAAAAAFftIAnL3c1kcl0_";
 
   var form = document.getElementById("intakeForm");
   if (!form) return;
@@ -315,20 +316,10 @@ title: Contact
   var emailBtn = document.getElementById("emailBtn");
   var humanStatusEl = document.getElementById("humanStatus");
 
-  // Insert the contact email link in the page header (built dynamically).
-  var emailSlot = document.getElementById("contactEmailSlot");
-  if (emailSlot) {
-    var addr = getRecipient();
-    var link = document.createElement("a");
-    link.href = "mailto:" + addr;
-    link.textContent = addr;
-    emailSlot.textContent = "";
-    emailSlot.appendChild(link);
-  }
-
   // ---- Cloudflare Turnstile verification ----------------------------------
-  // Copy and Open Email stay disabled until Turnstile reports success. If the
-  // token expires or the challenge errors, the buttons are disabled again.
+  // Copy, Open Email and the "Click to Reveal Email" button stay disabled until
+  // Turnstile reports success. If the token expires or the challenge errors,
+  // they are disabled again.
   // Note: this is client-side gating only; no server exists to validate the
   // token with Cloudflare's siteverify endpoint.
   var humanVerified = false;
@@ -338,6 +329,10 @@ title: Contact
     copyBtn.disabled = !ok;
     emailBtn.disabled = !ok;
     humanStatusEl.textContent = ok ? "Human verification completed." : "";
+
+    // Tell /assets/email-reveal.js so the reveal button can be enabled/disabled.
+    window.rdwHumanVerified = !!ok;
+    document.dispatchEvent(new CustomEvent("rdw:human-verified", { detail: { verified: !!ok } }));
   }
 
   window.onloadTurnstileCallback = function () {
@@ -616,7 +611,7 @@ title: Contact
   emailBtn.addEventListener("click", function () {
     if (!allowAction()) return;
 
-    var mailto = "mailto:" + getRecipient() +
+    var mailto = MAIL_SCHEME + getRecipient() +
       "?subject=" + encodeURIComponent(buildSubject()) +
       "&body=" + encodeURIComponent(buildEmailBody());
 

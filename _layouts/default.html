@@ -14,6 +14,12 @@
     <!-- Cache-bust stylesheet on every deploy so visitors always get the latest CSS -->
     <link rel="stylesheet" href="/assets/style.css?v={{ site.time | date: '%Y%m%d%H%M%S' }}">
     <!-- carousel-fix.css removed — consolidated into /assets/style.css to avoid caching conflicts -->
+    <style>
+        /* Click-to-reveal email button: looks like a text link, wraps cleanly on mobile. */
+        .email-reveal-btn { background: none; border: 0; padding: 0; margin: 0; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; }
+        .email-reveal-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+        .email-reveal-link { overflow-wrap: anywhere; }
+    </style>
 </head>
 <body>
     {% include header.html %}
@@ -22,7 +28,7 @@
         <div class="container footer-inner">
             <p><strong>Rapiprint Design Works LLC</strong></p>
             <p>Bold ideas. Built precisely. &middot; South-Central Iowa</p>
-            <p><a href="mailto:admin@rapiprintdesignworks.com">admin@rapiprintdesignworks.com</a></p>
+            <p><button type="button" class="email-reveal-btn" data-email-reveal>Click to Reveal Email</button></p>
         </div>
     </footer>
 
@@ -33,6 +39,8 @@
             <p class="gallery-modal-caption"></p>
         </div>
     </div>
+
+    <script src="/assets/email-reveal.js" defer></script>
 
     <script>
       document.addEventListener('DOMContentLoaded', function () {
