@@ -15,6 +15,7 @@ title: Contact
   .intake-steps li { margin-bottom: 4px; }
   .intake-note { margin: 0 0 12px; padding: 10px 12px; border-left: 4px solid #999; background: rgba(128,128,128,0.08); }
   .intake-actions { margin-top: 12px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .intake-actions .cta-button[disabled] { opacity: 0.5; cursor: not-allowed; }
   .intake-form input[type="text"], .intake-form textarea { max-width: 100%; box-sizing: border-box; }
   .intake-form input[readonly] { background: rgba(128,128,128,0.12); cursor: default; font-weight: 700; letter-spacing: 0.02em; }
   #summaryFallback { display: none; width: 100%; box-sizing: border-box; margin-top: 10px; min-height: 180px; }
@@ -23,6 +24,15 @@ title: Contact
   #copySuccess .copy-success-sub { font-weight: 700; margin: 0 0 6px; }
   #copySuccess ol { margin: 0; padding-left: 1.3em; }
   #copySuccess li { margin-bottom: 3px; }
+
+  /* Turnstile widget area (sits directly above the action buttons). */
+  .turnstile-wrap { margin-top: 16px; max-width: 100%; overflow-x: auto; }
+  .human-status { margin: 6px 0 0; font-size: 0.9em; color: #1b5e20; min-height: 1.2em; }
+
+  /* Honeypot: moved off-screen (not display:none) so it stays in the DOM but is
+     invisible and unreachable for human users. */
+  .hp-field { position: absolute !important; left: -10000px !important; top: auto !important; width: 1px; height: 1px; overflow: hidden; }
+
   @media (max-width: 900px) {
     .intake-layout { grid-template-columns: 1fr; }
     .intake-aside { position: static; }
@@ -44,7 +54,8 @@ title: Contact
     <div style="margin-bottom:20px">
       <p class="eyebrow">Contact</p>
       <h2>Rapiprint Design Works</h2>
-      <p class="contact-intro">South‑Central Iowa • Small-batch fabrication and practical engineering. Email: <a href="mailto:admin@rapiprintdesignworks.com">admin@rapiprintdesignworks.com</a></p>
+      <!-- The email address is not in the page source; it is inserted by JavaScript into #contactEmailSlot. -->
+      <p class="contact-intro">South‑Central Iowa • Small-batch fabrication and practical engineering. Email: <span id="contactEmailSlot">(enable JavaScript to view)</span></p>
       <p class="location-label">Location <small>South‑Central Iowa (pickup &amp; shipping available)</small></p>
     </div>
 
@@ -57,6 +68,13 @@ title: Contact
           <p>Please fill the form below with as much detail as you have. You will copy the summary and email it to us, along with your photos and files.</p>
 
           <form id="intakeForm" class="intake-form" novalidate>
+
+            <!-- Honeypot field (anti-bot). Humans never see or fill this.
+                 If it contains any value, copy and email actions are silently blocked. -->
+            <div class="hp-field" aria-hidden="true">
+              <label for="website">Leave this field empty</label>
+              <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" value="">
+            </div>
 
             <fieldset>
               <legend>Customer information</legend>
@@ -205,9 +223,15 @@ title: Contact
               After opening your email application, please attach photos, PDFs, drawings, CAD files, STL files, manuals, and any supporting documentation before sending.
             </p>
 
+            <!-- Cloudflare Turnstile widget (rendered explicitly by the script below). -->
+            <div class="turnstile-wrap">
+              <div id="turnstileWidget"></div>
+              <p id="humanStatus" class="human-status" role="status" aria-live="polite"></p>
+            </div>
+
             <div class="intake-actions">
-              <button id="copyBtn" class="cta-button" type="button">Copy Intake Summary</button>
-              <button id="emailBtn" class="cta-button" type="button">Open Email</button>
+              <button id="copyBtn" class="cta-button" type="button" disabled>Copy Intake Summary</button>
+              <button id="emailBtn" class="cta-button" type="button" disabled>Open Email</button>
             </div>
 
             <div id="copySuccess" role="status" aria-live="polite">
@@ -258,13 +282,27 @@ title: Contact
   </div>
 </section>
 
+<!-- Cloudflare Turnstile API (free plan). Loaded on this page only, so general site browsing is not affected. -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onloadTurnstileCallback" async defer></script>
+
 <script>
 (function () {
-  var RECIPIENT = "admin@rapiprintdesignworks.com";
+  // ---- Email address: assembled at runtime, never written out in the HTML ----
+  // Produces the intake mailbox address from separate parts.
+  function getRecipient() {
+    return ["admin", "rapiprintdesignworks.com"].join("@");
+  }
+
   var NOT_PROVIDED = "Not provided";
   var RULE = "=================================";
   var LONG_RULE = "================================================";
   var DASH_RULE = "------------------------------------------------";
+
+  // Turnstile site key. IMPORTANT: replace with the real site key for this domain
+  // from the Cloudflare dashboard (Turnstile > Add site). The value below is
+  // Cloudflare's public always-pass TEST key: it makes the widget work during
+  // development but provides NO real bot protection.
+  var TURNSTILE_SITE_KEY = "1x00000000000000000000AA";
 
   var form = document.getElementById("intakeForm");
   if (!form) return;
@@ -273,6 +311,44 @@ title: Contact
   var successEl = document.getElementById("copySuccess");
   var fallbackEl = document.getElementById("summaryFallback");
   var refInput = document.getElementById("reference_number");
+  var copyBtn = document.getElementById("copyBtn");
+  var emailBtn = document.getElementById("emailBtn");
+  var humanStatusEl = document.getElementById("humanStatus");
+
+  // Insert the contact email link in the page header (built dynamically).
+  var emailSlot = document.getElementById("contactEmailSlot");
+  if (emailSlot) {
+    var addr = getRecipient();
+    var link = document.createElement("a");
+    link.href = "mailto:" + addr;
+    link.textContent = addr;
+    emailSlot.textContent = "";
+    emailSlot.appendChild(link);
+  }
+
+  // ---- Cloudflare Turnstile verification ----------------------------------
+  // Copy and Open Email stay disabled until Turnstile reports success. If the
+  // token expires or the challenge errors, the buttons are disabled again.
+  // Note: this is client-side gating only; no server exists to validate the
+  // token with Cloudflare's siteverify endpoint.
+  var humanVerified = false;
+
+  function setVerified(ok) {
+    humanVerified = !!ok;
+    copyBtn.disabled = !ok;
+    emailBtn.disabled = !ok;
+    humanStatusEl.textContent = ok ? "Human verification completed." : "";
+  }
+
+  window.onloadTurnstileCallback = function () {
+    if (!window.turnstile) return;
+    window.turnstile.render("#turnstileWidget", {
+      sitekey: TURNSTILE_SITE_KEY,
+      callback: function () { setVerified(true); },
+      "expired-callback": function () { setVerified(false); },
+      "error-callback": function () { setVerified(false); }
+    });
+  };
 
   // ---- Reference number: RDW-YYYYMMDD-HHMM-XXXX ---------------------------
   function pad(n, width) {
@@ -353,6 +429,28 @@ title: Contact
     if (!val("part_name")) return "Please enter a part name or short description.";
     if (!document.getElementById("consent").checked) return "Please agree to be contacted.";
     return null;
+  }
+
+  // ---- Gate for every intake action (copy + email) ------------------------
+  //   1. Honeypot  -> a populated "website" field means an automated filler.
+  //                   Block silently: no message, so bots learn nothing.
+  //   2. Turnstile -> must be verified (buttons are also disabled until then).
+  //   3. Validation -> existing required-field rules.
+  // Returns true only when the action may proceed.
+  function allowAction() {
+    hideSuccess();
+
+    if (val("website")) return false;
+
+    if (!humanVerified) {
+      setStatus("Please complete the human verification first.", true);
+      return false;
+    }
+
+    var error = validate();
+    if (error) { setStatus(error, true); return false; }
+
+    return true;
   }
 
   function orNone(value) {
@@ -493,10 +591,8 @@ title: Contact
   // Prevent Enter key from doing anything; nothing is submitted anywhere.
   form.addEventListener("submit", function (e) { e.preventDefault(); });
 
-  document.getElementById("copyBtn").addEventListener("click", function () {
-    hideSuccess();
-    var error = validate();
-    if (error) { setStatus(error, true); return; }
+  copyBtn.addEventListener("click", function () {
+    if (!allowAction()) return;
 
     var summary = buildSummary();
     copyText(summary).then(function (ok) {
@@ -517,11 +613,10 @@ title: Contact
     });
   });
 
-  document.getElementById("emailBtn").addEventListener("click", function () {
-    var error = validate();
-    if (error) { hideSuccess(); setStatus(error, true); return; }
+  emailBtn.addEventListener("click", function () {
+    if (!allowAction()) return;
 
-    var mailto = "mailto:" + RECIPIENT +
+    var mailto = "mailto:" + getRecipient() +
       "?subject=" + encodeURIComponent(buildSubject()) +
       "&body=" + encodeURIComponent(buildEmailBody());
 
