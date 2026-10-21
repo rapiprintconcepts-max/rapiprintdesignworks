@@ -155,23 +155,6 @@ title: Contact
             </fieldset>
 
             <fieldset>
-              <legend>Photos / attachments</legend>
-              <p class="muted-note" style="margin-top:0">Files are not uploaded from this page. Select them here so they are listed in your summary, then attach them to your email.</p>
-
-              <label for="part_photos">Photos of the part (optional) — multiple allowed<br>
-                <input id="part_photos" name="part_photos" type="file" accept="image/*" multiple>
-              </label>
-
-              <label for="assembly_photos" style="display:block;margin-top:8px">Photos of the assembly (optional) — multiple allowed<br>
-                <input id="assembly_photos" name="assembly_photos" type="file" accept="image/*" multiple>
-              </label>
-
-              <label for="other_files" style="display:block;margin-top:8px">Other files (drawings, STLs, PDFs) — multiple allowed<br>
-                <input id="other_files" name="other_files" type="file" accept=".pdf,.stl,.zip,.step,.stp,.dwg,.dxf,image/*" multiple>
-              </label>
-            </fieldset>
-
-            <fieldset>
               <legend>Additional notes</legend>
 
               <label for="additional_notes" style="display:block">Any extra notes, constraints, or reference numbers<br>
@@ -181,6 +164,23 @@ title: Contact
               <label for="short_reference" style="display:block;margin-top:8px">Short reference / keyword<br>
                 <input id="short_reference" name="short_reference" type="text" placeholder="Reference or keyword">
               </label>
+            </fieldset>
+
+            <fieldset>
+              <legend>Files Being Sent With This Email</legend>
+              <p class="muted-note" style="margin-top:0">Select the types of files you will attach to your email. Nothing is uploaded from this page.</p>
+
+              <label for="attach_part_photos"><input id="attach_part_photos" type="checkbox" name="attachments" value="Photos of the part"> Photos of the part</label><br>
+              <label for="attach_all_sides"><input id="attach_all_sides" type="checkbox" name="attachments" value="Photos showing all sides"> Photos showing all sides</label><br>
+              <label for="attach_ruler"><input id="attach_ruler" type="checkbox" name="attachments" value="Photos with ruler or tape measure"> Photos with ruler or tape measure</label><br>
+              <label for="attach_assembly"><input id="attach_assembly" type="checkbox" name="attachments" value="Assembly photos"> Assembly photos</label><br>
+              <label for="attach_pdf"><input id="attach_pdf" type="checkbox" name="attachments" value="PDF documents"> PDF documents</label><br>
+              <label for="attach_drawings"><input id="attach_drawings" type="checkbox" name="attachments" value="Drawings"> Drawings</label><br>
+              <label for="attach_cad"><input id="attach_cad" type="checkbox" name="attachments" value="CAD files"> CAD files</label><br>
+              <label for="attach_stl"><input id="attach_stl" type="checkbox" name="attachments" value="STL files"> STL files</label><br>
+              <label for="attach_manuals"><input id="attach_manuals" type="checkbox" name="attachments" value="Manuals"> Manuals</label><br>
+              <label for="attach_reference"><input id="attach_reference" type="checkbox" name="attachments" value="Reference documents"> Reference documents</label><br>
+              <label for="attach_none"><input id="attach_none" type="checkbox" name="attachments" value="No attachments available" data-exclusive="true"> No attachments available</label>
             </fieldset>
 
             <label for="consent" style="display:block;margin-top:8px;">
@@ -263,6 +263,8 @@ title: Contact
   var RECIPIENT = "admin@rapiprintdesignworks.com";
   var NOT_PROVIDED = "Not provided";
   var RULE = "=================================";
+  var LONG_RULE = "================================================";
+  var DASH_RULE = "------------------------------------------------";
 
   var form = document.getElementById("intakeForm");
   if (!form) return;
@@ -331,6 +333,19 @@ title: Contact
     );
   }
 
+  // "No attachments available" is mutually exclusive with the other attachment types.
+  Array.prototype.forEach.call(form.querySelectorAll('input[name="attachments"]'), function (box) {
+    box.addEventListener("change", function () {
+      if (!box.checked) return;
+      var isNone = box.getAttribute("data-exclusive") === "true";
+      Array.prototype.forEach.call(form.querySelectorAll('input[name="attachments"]'), function (other) {
+        if (other === box) return;
+        var otherIsNone = other.getAttribute("data-exclusive") === "true";
+        if (isNone || otherIsNone) other.checked = false;
+      });
+    });
+  });
+
   // Same required fields as before: name, contact, part name, consent.
   function validate() {
     if (!val("customer_name")) return "Please enter your full name.";
@@ -348,17 +363,14 @@ title: Contact
     return label + ":\n" + orNone(value) + "\n";
   }
 
-  // "Mating Part Available" also carries whether the part mates with others,
-  // so no existing intake information is lost.
-  function matingSummary() {
-    var have = radio("have_mating_part");
-    var mates = radio("mates_with");
-    if (!have && !mates) return "";
-    var text = have || NOT_PROVIDED;
-    if (mates) text += " (mates with other parts: " + mates + ")";
-    return text;
+  // Attachment reminder text shared by the summary and the email body.
+  function attachmentList() {
+    var selected = checks("attachments");
+    if (!selected.length) return NOT_PROVIDED;
+    return selected.map(function (s) { return "- " + s; }).join("\n");
   }
 
+  // Field order below intentionally mirrors the order of fields in the form.
   function buildSummary() {
     var parts = [];
     parts.push(RULE);
@@ -367,26 +379,74 @@ title: Contact
     parts.push(RULE);
     parts.push("");
 
+    // Customer information
     parts.push(field("Reference Number", REFERENCE_NUMBER));
     parts.push(field("Customer Name", val("customer_name")));
     parts.push(field("Contact", val("contact")));
-    parts.push(field("Business", val("business")));
     parts.push(field("Address", val("address")));
+    parts.push(field("Business", val("business")));
+
+    // Part details
     parts.push(field("Part Name", val("part_name")));
     parts.push(field("Part Condition", radio("part_condition")));
     parts.push(field("Material", checks("material").join(", ")));
-    parts.push(field("Service Requested", checks("service").join(", ")));
-    parts.push(field("Mating Part Available", matingSummary()));
+
+    // Fit & function
+    parts.push(field("Mates With Other Parts", radio("mates_with")));
+    parts.push(field("Mating Part Available", radio("have_mating_part")));
     parts.push(field("Part Function", val("part_function")));
+
+    // Service needed
+    parts.push(field("Service Requested", checks("service").join(", ")));
+
+    // Accuracy & timeline
     parts.push(field("Accuracy Requirement", radio("accuracy")));
     parts.push(field("Timeline", radio("timeline")));
+
+    // Additional notes
     parts.push(field("Additional Notes", val("additional_notes")));
     parts.push(field("Reference", val("short_reference")));
+
+    // Files being sent with this email
+    parts.push(LONG_RULE);
+    parts.push("");
+    parts.push("FILES EXPECTED WITH THIS EMAIL");
+    parts.push("");
+    parts.push(attachmentList());
+    parts.push("");
+    parts.push(LONG_RULE);
+    parts.push("");
+    parts.push("ATTACHMENT REMINDER");
+    parts.push("");
+    parts.push("The files selected above are NOT automatically transmitted from this website.");
+    parts.push("");
+    parts.push("Please verify they are attached to your email before clicking Send.");
+    parts.push("");
+    parts.push(LONG_RULE);
+    parts.push("");
 
     parts.push(RULE);
     parts.push("END OF INTAKE");
     parts.push(RULE);
     return parts.join("\n");
+  }
+
+  function buildEmailBody() {
+    return [
+      "Reference Number: " + REFERENCE_NUMBER,
+      "",
+      "IMPORTANT ATTACHMENT REMINDER",
+      "",
+      "The files selected in the intake form are not transferred automatically.",
+      "",
+      "Before sending your email, please verify that all photos, drawings, PDFs, CAD files, STL files, manuals, and supporting documentation have been attached.",
+      "",
+      DASH_RULE,
+      "",
+      "Paste your copied intake summary below:",
+      "",
+      ""
+    ].join("\r\n");
   }
 
   function oneLine(text) {
@@ -461,11 +521,9 @@ title: Contact
     var error = validate();
     if (error) { hideSuccess(); setStatus(error, true); return; }
 
-    var body = "Reference Number: " + REFERENCE_NUMBER + "\r\n\r\n" +
-      "Paste your copied intake summary below, then attach your photos and files.\r\n\r\n";
     var mailto = "mailto:" + RECIPIENT +
       "?subject=" + encodeURIComponent(buildSubject()) +
-      "&body=" + encodeURIComponent(body);
+      "&body=" + encodeURIComponent(buildEmailBody());
 
     setStatus("Opening your email application. Paste the intake summary into the email body and attach your files.", false);
     window.location.href = mailto;
